@@ -3,6 +3,9 @@ module.exports = function (kibana) {
     uiExports: {
       visTypes: ['plugins/mapster/mapster']
     }
+    /*init: function(server, options) {
+      server.exposeStaticDir('/testlol/{path*}', 'plugins/mapster/lib');
+    }*/
   });
 };
 

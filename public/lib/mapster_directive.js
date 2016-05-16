@@ -2,7 +2,7 @@ var _ = require('lodash');
 var $ = require('jquery');
 var numeral = require('numeral');
 //require('plugins/mapster/lib/svg.js');
-var d3 = require('plugins/mapster/lib/d3.v3.min.js');
+var d3 = require('plugins/mapster/lib/d3.js');
 var topojson = require('plugins/mapster/lib/topojson.js');
 var map_data = require('plugins/mapster/lib/map.json');
 
@@ -92,19 +92,28 @@ module.directive('vectormap', function (es) {
         /*});
       });
       */
+      var height = element.parent().height();
+
+      //TODO Compute scale automatically depending on window size
       var projection = d3.geo.mercator()
-        .scale(150);
+        .scale(100);
+
       var path = d3.geo.path()
         .projection(projection);
-      var svg = d3.select("#drawArea").append("svg")
+
+      // Remove previously drawn map
+      $('svg').remove();
+
+      var svg = d3.select("vectormap").append("svg")
         .attr("width", element.parent().width())
         .attr("height", element.parent().height());
+
       var g = svg.append("g");
 
       // Draw d3 map
-      d3.json('https://gist.githubusercontent.com/GordyD/49654901b07cb764c34f/raw/27eff6687f677c984a11f25977adaa4b9332a2a9/countries-and-states.json', function(error, world) {
-          var countries = topojson.feature(world, world.objects.countries).features;
-          console.log(countries);
+      // The first '/' in the url below is required to really access http://url/plugins/... and not app/plugins
+      d3.json('/plugins/mapster/lib/map.json', function(error, world) {
+          var countries = topojson.feature(world, world.objects.land).features;
           svg.selectAll(".country")
           .data(countries)
           .enter().insert("path", ".graticule")
@@ -147,10 +156,10 @@ module.directive('vectormap', function (es) {
       r.then(function(result) {
         var list = result["hits"]["hits"];
         console.log("Computing", list.length, "events.");
-        for (var i = 0; i < list.length; i++) {
+        for (var i = 0; i < 1 && list.length; i++) {
           if (list[i] == undefined) {
             console.log("Err", i);
-            console.log(list);
+            console.log("List", list);
             break;
           }
           var coords = list[i]["_source"]["src_coords"].split(',');
@@ -163,26 +172,33 @@ module.directive('vectormap', function (es) {
             .attr('x2', nbs_coords.x)
             .attr('y2', nbs_coords.y);
             */
+        }
 
-          var route = svg.append("path")
-            //.datum({ type: "LineString", coordinates: [coords, nbs_coords]})
+        //TODO Move this above
+        var coords = [29.76, -95.36];
+        var target_coords = [48.85, 2.34];
+
+        console.log(path);
+
+        var route = svg.append("path")
+            .datum({ type: "LineString", coordinates: [coords, target_coords] })
             .attr("class", "route")
             .attr("d", path);
-        }
+
       }, function(error) {
-        console.log("Error", error);
+          console.log("Error", error);
       });
 
     }
   }
 
   return {
-    restrict: 'E',
-    scope: {
-      data: '=',
-      options: '='
-    },
-    link: link
+      restrict: 'E',
+      scope: {
+          data: '=',
+          options: '='
+      },
+      link: link
   };
 });
 
