@@ -1,0 +1,22 @@
+fuu
+<div class="form-group">
+  <!-- Color Scale -->
+  <div class="form-group">
+    <h3>Map Color Scale</h3>
+    <label>Min Color: </label>
+    <input type="text" ng-model="vis.params.minColor"><br>
+    <label>Max Color: </label>
+    <input type="text" ng-model="vis.params.maxColor">
+  </div>
+
+  <!-- Tooltip Number Format Type -->
+  <div class="form-group">
+    <h3>Tooltip Number Format</h3>
+    <select ng-model="vis.params.tipNumberFormat" class="form-control">
+      <option value="number" selected="selected">number</option>
+      <option value="bytes">bytes</option>
+      <option value="currency">currency</option>
+      <option value="percentage">percentage</option>
+    </select>
+  </div>
+</div>
