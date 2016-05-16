@@ -95,8 +95,8 @@ module.directive('vectormap', function (es) {
       var height = element.parent().height();
 
       //TODO Compute scale automatically depending on window size
-      var projection = d3.geo.mercator()
-        .scale(100);
+      //var projection = d3.geo.mercator();
+      var projection = d3.geo.equirectangular();
 
       var path = d3.geo.path()
         .projection(projection);
@@ -108,18 +108,85 @@ module.directive('vectormap', function (es) {
         .attr("width", element.parent().width())
         .attr("height", element.parent().height());
 
-      var g = svg.append("g");
+      var map = svg.append("g")
+              .attr("class", "countries");
 
       // Draw d3 map
       // The first '/' in the url below is required to really access http://url/plugins/... and not app/plugins
-      d3.json('/plugins/mapster/lib/map.json', function(error, world) {
-          var countries = topojson.feature(world, world.objects.land).features;
+      //d3.json('/plugins/mapster/lib/map.json', function(error, world) {
+      d3.json('/plugins/mapster/lib/admin0_polygons_topo.json', function(error, world) {
+          /*OLD WAY BUT STILL GOOD
+           * var countries = topojson.feature(world, world.objects
+             //     .land
+                    .admin0_polygons
+                    ).features;
           svg.selectAll(".country")
           .data(countries)
           .enter().insert("path", ".graticule")
           .attr("class", "country")
-          .attr("d", path);
+          .attr("d", path);*/
+          var countries = topojson.feature(world, world.objects.admin0_polygons).features;
+          map.selectAll(".country")
+              .data(countries)
+              .enter()
+              .append("path")
+              .attr("class", "country")
+              .attr("d", path);
       });
+
+      var object = svg.append("path")
+                .attr("class", "object")
+                .attr("d", "M455.456,249.343l-13.932,3.993v53.451h-40.142l-30.042-37.909h-68.935v50.638c0,6.752-2.573,12.224-5.734,12.224l-78.506-62.856H101.073c-1.374,0-2.733-0.027-4.09-0.05v-78.049c1.357-0.022,2.717-0.047,4.09-0.047h121.717l73.873-62.862c3.169,0,5.729,5.475,5.729,12.238v50.624h64.635l34.354-43.598h40.142v59.82l13.927,4.169C464.818,230.934,455.456,249.343,455.456,249.343z M0,229.808c0,19.485,34.821,35.634,80.359,38.594v-77.169C34.827,194.19,0,210.327,0,229.808z");
+
+
+        //TODO Move this above
+        var coords = [29.76, -95.36];
+        var target_coords = [48.85, 2.34];
+
+        //THIS FUNCTION IS NEEDED BECAUSE WORLD COORDS != NORMAL COORDS
+        function getCoords(coords) {
+            return [coords[1], coords[0]];
+        }
+
+        var coords = getCoords(coords);
+        var target_coords = getCoords(target_coords);
+
+        console.log("Using coords:", coords);
+        console.log("Using coords:", target_coords);
+
+        var route = svg.append("path")
+            .datum({ type: "LineString", coordinates: [coords, target_coords] })
+            .attr("class", "route")
+            .attr("d", path);
+
+      function transition(object, route) {
+          var l = route.node().getTotalLength();
+          object.transition()
+              .duration(4000)
+              .attrTween("transform", delta(route.node())); //TODO Tween sucks
+      }
+
+      function delta(path) {
+          var l = path.getTotalLength();
+          return function(i) {
+              return function(t) {
+                  var p = path.getPointAtLength(t * l);
+                  var t2 = Math.min(t + 0.05, 1);
+                  var p2 = path.getPointAtLength(t2 * l);
+
+                  var x = p2.x - p.x;
+                  var y = p2.y - p.y;
+                  var r = 180 - Math.atan2(-y, x) * 180 / Math.PI;
+                  //var s = Math.min(Math.sin(Math.PI * t) * 0.7, 0.3);
+                  //return "translate(" + p.x + "," + p.y + ") scale(" + s + ") rotate(" + r + ")";
+                  return "translate(" + p.x + "," + p.y + ") scale(0.05) rotate(" + r + ")";
+              }
+          }
+      }
+
+
+      transition(object, route);
+
       /*// Remove old SVGs and create a new one
       try {
         $("#drawArea").empty();
@@ -173,17 +240,6 @@ module.directive('vectormap', function (es) {
             .attr('y2', nbs_coords.y);
             */
         }
-
-        //TODO Move this above
-        var coords = [29.76, -95.36];
-        var target_coords = [48.85, 2.34];
-
-        console.log(path);
-
-        var route = svg.append("path")
-            .datum({ type: "LineString", coordinates: [coords, target_coords] })
-            .attr("class", "route")
-            .attr("d", path);
 
       }, function(error) {
           console.log("Error", error);
