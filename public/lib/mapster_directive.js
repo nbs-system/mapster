@@ -123,15 +123,35 @@ module.directive('vectormap', function (es) {
               timestamp_insert: {
                 gt: 'now-' + refresh_rate + 's'
               }
-            },
+            }
+          },
+          aggs: {
+            "top-tags": {
+              terms: {
+                field: "peer_ip",
+                size: 10
+              },
+              aggs: {
+                top_tag_hits: {
+                  top_hits: {
+                    sort: [
+                    {"timestamp_insert": {"order": "asc"}}
+                    ]
+                  }
+                }
+              }
+            }
           }
+
         },
+        size: 10000,
         sort: 'timestamp_insert'
       });
 
       // Compute promise
       r.then(function(result) {
         var list = result["hits"]["hits"];
+        console.log(result);
         console.log("Computing", list.length, "events.");
 
         /* Tmp */
