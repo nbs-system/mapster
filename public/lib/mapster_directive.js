@@ -1,14 +1,9 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var numeral = require('numeral');
-//require('plugins/mapster/lib/svg.js');
-var d3 = require('plugins/mapster/lib/d3.js');
-var topojson = require('plugins/mapster/lib/topojson.js');
-var map_data = require('plugins/mapster/lib/map.json');
 
-// jvectormap - version 2.0.3
-require('plugins/mapster/lib/jvectormap/jquery-jvectormap.min');
-require('plugins/mapster/lib/jvectormap/jquery-jvectormap.css');
+var d3 = require('plugins/mapster/lib/d3.min.js');
+var topojson = require('plugins/mapster/lib/topojson.min.js');
 
 var module = require('ui/modules').get('mapster');
 
