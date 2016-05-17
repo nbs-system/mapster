@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var numeral = require('numeral');
+var dateformat = require('dateformat');
 
 var d3 = require('plugins/mapster/lib/d3.min.js');
 var topojson = require('plugins/mapster/lib/topojson.min.js');
@@ -10,6 +11,9 @@ var module = require('ui/modules').get('mapster');
 module.directive('vectormap', function (es) {
 
   function link (scope, element) {
+
+    // Query every 10 seconds
+    var refresh_rate = 10;
 
     function onSizeChange() {
       return {
@@ -31,7 +35,7 @@ module.directive('vectormap', function (es) {
       var duration = l*20; //TODO Maybe it's not fitting well on small screens
       object.transition()
         .duration(duration)
-        .attrTween("transform", delta(route.node())); //TODO Tween sucks
+        .attrTween("transform", delta(route.node())); //TODO Tween sucks (too smooth)
     }
 
     function delta(path) {
@@ -39,8 +43,7 @@ module.directive('vectormap', function (es) {
       return function(i) {
         return function(t) {
           if (t == 1) {
-            console.log("DONE");
-            return "scale(0)"; //TODO Yes you hide it but it's still there
+            return "scale(0)"; //TODO Yes you hide it but it's still there :x
           }
           var p = path.getPointAtLength(t * l);
           var t2 = Math.min(t + 0.05, 1);
@@ -59,8 +62,6 @@ module.directive('vectormap', function (es) {
     }
 
     function render() {
-      console.log("You called render !");
-
       // Remove previously drawn map
       $('svg').remove();
 
@@ -74,7 +75,6 @@ module.directive('vectormap', function (es) {
 
       //TODO Compute scale automatically depending on window size
       var scale = (height/330)*100;
-      console.log("scale", scale);
 
       var projection = d3.geo.equirectangular()
         .scale(scale)
@@ -111,19 +111,18 @@ module.directive('vectormap', function (es) {
 
       var target_coords = getCoords([48.85, 2.34]);
 
-      // Generate index and retrieve data from es
-      //TODO generate index from current date
+      // Get data from es
+      var index = 'events_storage_' + dateformat(new Date(), "yyyy-mm-dd");
+      //TODO this search sucks
       var r = es.search({
-        index: 'events_storage_2016-05-17',
+        index: index,
         body: {
           query: {
             range: {
               // We filter timestamp_insert instead of timestamp_syslog because this last one is often doing shit
               timestamp_insert: {
-                gt: 'now-10s'
+                gt: 'now-' + refresh_rate + 's'
               }
-                                // TODO Percentage aggregation
-                                // TODO Filter by IP?
             },
           }
         },
@@ -139,7 +138,7 @@ module.directive('vectormap', function (es) {
         var f = list[0]["_source"]["timestamp_insert"];
         var l = list[list.length-1]["_source"]["timestamp_insert"];
         var wsize = f - l;
-        console.log("Window size", f, l, wsize);
+        console.log("Window time:", f, l, wsize);
         /* Tmp */
 
         for (var i = 0; i < list.length; i++) {
@@ -168,7 +167,6 @@ module.directive('vectormap', function (es) {
 
           /* Check if path already exists */
           if (!$("#p"+i).length) {
-            //TODO Cf datum arcs for smoother
             route = svg.append("path")
               .datum({type: "LineString", coordinates:[coords, target_coords]})
               .attr("class", "route")
