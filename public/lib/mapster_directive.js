@@ -8,7 +8,7 @@ var topojson = require('plugins/mapster/lib/topojson.min.js');
 
 var module = require('ui/modules').get('mapster');
 
-module.directive('vectormap', function (es, $timeout, $interval) {
+module.directive('mapster', function (es, $timeout, $interval) {
 
   function link (scope, element) {
 
@@ -17,6 +17,10 @@ module.directive('vectormap', function (es, $timeout, $interval) {
     var target_coords = getCoords([48.85, 2.34]);
 
     var circles_death = [];
+
+    scope.$watch('data', function() {
+      console.log(scope.data);
+    });
 
     //THIS FUNCTION IS NEEDED BECAUSE WORLD COORDS != MAP COORDS
     function getCoords(coords) {
@@ -83,7 +87,7 @@ module.directive('vectormap', function (es, $timeout, $interval) {
           var size = circle.attr("r") + 1;
           if (size > 10) size = 10;
           circle.transition()
-            .duration(1000)
+            .duration(2000)
             .attr("r", size);
 
           // Don't die !
@@ -149,7 +153,7 @@ module.directive('vectormap', function (es, $timeout, $interval) {
       var path = d3.geo.path()
         .projection(projection);
 
-      var svg = d3.select("vectormap").append("svg")
+      var svg = d3.select("mapster").append("svg")
         .attr("width", element.parent().width())
         .attr("height", element.parent().height());
 
@@ -252,15 +256,14 @@ module.directive('vectormap', function (es, $timeout, $interval) {
 
     }
 
-    $timeout(render, 200);
+    //$timeout(render, 200);
 
   }
 
   return {
     restrict: 'E',
     scope: {
-      data: '=',
-      options: '='
+      data: '='
     },
     link: link
   };

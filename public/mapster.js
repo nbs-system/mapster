@@ -1,17 +1,58 @@
 require('plugins/mapster/mapster.less');
+require('plugins/mapster/lib/mapster_controller.js');
 require('plugins/mapster/lib/mapster_directive.js');
 
 function mapsterProvider(Private) {
   var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+  var Schemas = Private(require('ui/Vis/Schemas'));
 
   return new TemplateVisType({
     name: 'mapster',
     title: 'Mapster',
-    description: 'Displays a map of shaded regions using a field containing a 2 letter country ' +
-      ', or US state, code. Regions with more hits are shaded darker. Note that this does use the' +
-      ' Elasticsearch terms aggregation, so it is important that you set it to the correct field.',
+    description: 'MAPSTER MUCH PIEW MUCH WOW',
     icon: 'fa-globe',
-    template: require('plugins/mapster/mapster.html')
+    template: require('plugins/mapster/mapster.html'),
+    schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Metric',
+          min: 1,
+          max: 1,
+        }, 
+        {
+          group: 'buckets',
+          name: 'timestamp',
+          icon: 'fa fa-clock-o',
+          title: 'Timestamp',
+          min: 1,
+          max: 1
+        },
+        {
+          group: 'buckets',
+          name: 'src_coords',
+          icon: 'fa fa-map',
+          title: 'Coordinates',
+          min: 1,
+          max: 1
+        },
+        {
+          group: 'buckets',
+          name: 'peer_ip',
+          icon: 'fa fa-map',
+          title: 'IP',
+          min: 1,
+          max: 1
+        },
+        {
+          group: 'buckets',
+          name: 'sensor',
+          icon: 'fa fa-map',
+          title: 'Sensor',
+          min: 1,
+          max: 1
+        }
+    ])
   });
 }
 
