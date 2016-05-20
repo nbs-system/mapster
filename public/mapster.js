@@ -15,7 +15,7 @@ function mapsterProvider(Private) {
     schemas: new Schemas([
         {
           group: 'metrics',
-          name: 'metric',
+          name: 'count',
           title: 'Metric',
           min: 1,
           max: 1,

@@ -1,24 +1,35 @@
 var _ = require('lodash');
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 
 var module = require('ui/modules').get('mapster');
 
-module.controller('MapsterController', function ($scope) {
+module.controller('MapsterController', function ($scope, Private) {
+  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+
   $scope.$watch('esResponse', function (resp) {
-    if (!resp) {
-      $scope.data = null;
-      return;
+    if (resp) {
+      const vis = $scope.vis;
+      const params = vis.params;
+
+      var table = tabifyAggResponse(vis, resp, {
+        partialRows: params.showPatialRows,
+        minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels,
+        asAggConfigResults: true
+      });
+
+      var table = table.tables[0];
+
+      $scope.data = table.rows.map(function(row) {
+        return {
+          timestamp: row[0].key,
+          coords: row[1].key,
+          peer_ip: row[2].key,
+          sensor: row[3].key,
+          count: row[4].key
+        };
+      });
     }
 
-    var timestampAggId = $scope.vis.aggs.bySchemaName['timestamp'][0].id;
-    var srcCoordsAggId = $scope.vis.aggs.bySchemaName['src_coords'][0].id;
-    var buckets = resp.aggregations[timestampAggId] && resp.aggregations[timestampAggId].buckets;
-
-    $scope.data = buckets.map(function(bucket) {
-      return {
-        timestamp: bucket.key,
-        coords: bucket //TODO Make it bun dem !
-      };
-    });
   });
 });
 
