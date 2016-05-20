@@ -19,6 +19,8 @@ module.controller('MapsterController', function ($scope, Private) {
 
       var table = table.tables[0];
 
+      console.log(table);
+
       $scope.data = table.rows.map(function(row) {
         return {
           timestamp: row[0].key,

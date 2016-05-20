@@ -3,12 +3,14 @@ var $ = require('jquery');
 var numeral = require('numeral');
 var dateformat = require('dateformat');
 
+// TODO Remove d3 lib it's already in kibana
 var d3 = require('plugins/mapster/lib/d3.min.js');
 var topojson = require('plugins/mapster/lib/topojson.min.js');
+var geohash = require('plugins/mapster/lib/latlon-geohash.js');
 
 var module = require('ui/modules').get('mapster');
 
-module.directive('mapster', function (es, $timeout, $interval) {
+module.directive('mapster', function (es, $timeout) {
 
   function link (scope, element) {
 
@@ -16,10 +18,12 @@ module.directive('mapster', function (es, $timeout, $interval) {
     var current_refresh = 1000; // Ms
     var target_coords = getCoords([48.85, 2.34]);
 
+    var svg, projection, path;
+
     var circles_death = [];
 
     scope.$watch('data', function() {
-      console.log(scope.data);
+      render_events();
     });
 
     //THIS FUNCTION IS NEEDED BECAUSE WORLD COORDS != MAP COORDS
@@ -69,10 +73,11 @@ module.directive('mapster', function (es, $timeout, $interval) {
       }, refresh_rate * 1000);
     }
 
-    function show_event(svg, path, projection, i, event, diff) {
+    function show_event(i, event, diff) {
       $timeout(function() {
         /****** Draw it ! ******/
-        var coords = getCoords(event["src_coords"].split(','));
+        var coords = geohash.decode(event["coords"]);
+        coords = getCoords([coords.lat, coords.lon]);
 
         var circle;
         var route;
@@ -134,7 +139,46 @@ module.directive('mapster', function (es, $timeout, $interval) {
       }, diff);
     }
 
-    function render() {
+    function render_events() {
+      // Remove old useless elements
+      $(".route").remove();
+
+      var list = scope.data;
+
+      console.log("Computing", list.length, "events.");
+
+      /* Tmp */
+      var f = list[0]["timestamp"];
+      console.log(f);
+      f = new Date(f); // Remove the +02
+      console.log(f);
+
+      var l = list[list.length-1]["timestamp"];
+      console.log(l);
+      l = new Date(l); // Remove the +02
+      console.log(l);
+
+      var wsize = l-f;
+      console.log("Window time size:", wsize);
+      current_refresh = wsize;
+      /* Tmp */
+
+      var ref_date = list[0]["timestamp"];
+      ref_date = new Date(ref_date);
+      console.log(ref_date);
+
+      for (var i = 0; i < list.length; i++) {
+        var date = list[i]["timestamp"];
+        date = new Date(date);
+
+        var diff = date - ref_date;
+        diff = diff + 50*i;
+
+        show_event(i, list[i], diff);
+      }
+    }
+
+    function render_map() {
       element.css({
         height: element.parent().height(),
         width: '100%'
@@ -146,14 +190,14 @@ module.directive('mapster', function (es, $timeout, $interval) {
       //TODO Compute scale automatically depending on window size
       var scale = (height/300)*100;
 
-      var projection = d3.geo.equirectangular()
+      projection = d3.geo.equirectangular()
         .scale(scale)
         .translate([width/2, height/2]);
 
-      var path = d3.geo.path()
+      path = d3.geo.path()
         .projection(projection);
 
-      var svg = d3.select("mapster").append("svg")
+      svg = d3.select("mapster").append("svg")
         .attr("width", element.parent().width())
         .attr("height", element.parent().height());
 
@@ -174,89 +218,9 @@ module.directive('mapster', function (es, $timeout, $interval) {
           .attr("d", path);
       });
 
-      $interval(function() {
-        // Remove old useless elements
-
-        $(".route").remove();
-
-        // Get data from es
-        var index = 'events_storage_' + dateformat(new Date(), "yyyy-mm-dd");
-        //TODO this search sucks (but less than before)
-        var r = es.search({
-          index: index,
-          body: {
-            query: {
-              bool: {
-                must: [
-                {
-                  terms: {
-                    sensor: ['apache_404', 'nginx_auth', 'naxsi', 'naxsi_learning', 'naxsi_uwa']
-                  }
-                },
-                {
-                  range: {
-                    // We filter timestamp_insert instead of timestamp_syslog because this last one is often doing shit
-                    timestamp_insert: {
-                      gt: 'now-' + refresh_rate + 's'
-                    }
-                  }
-                }
-                ]
-              }
-            }
-          },
-          size: 10000,
-          sort: 'timestamp_insert'
-        });
-
-        // Compute promise
-        r.then(function(result) {
-          var list = result["hits"]["hits"];
-          console.log("Computing", list.length, "events.");
-
-          /* Tmp */
-          var f = list[0]["_source"]["timestamp_insert"];
-          f = new Date(f.substring(0, f.length-3)); // Remove the +02
-
-          var l = list[list.length-1]["_source"]["timestamp_insert"];
-          l = new Date(l.substring(0, l.length-3)); // Remove the +02
-
-          var wsize = l-f;
-          console.log("Window time size:", wsize);
-          current_refresh = wsize;
-          /* Tmp */
-
-          var ref_date = list[0]["_source"]["timestamp_insert"];
-          ref_date = new Date(ref_date.substring(0, ref_date.length - 3));
-          console.log(ref_date);
-
-          for (var i = 0; i < list.length; i++) {
-            if (list[i] == undefined) {
-              console.log("Err", i);
-              console.log("List", list);
-              break;
-            }
-
-            var event = list[i]["_source"];
-
-            var date = list[i]["_source"]["timestamp_insert"];
-            date = new Date(date.substring(0, date.length-3));
-
-            var diff = date - ref_date;
-            diff = diff + 50*i;
-
-            show_event(svg, path, projection, i, event, diff);
-          }
-
-        }, function(error) {
-          console.log("Error", error);
-        });
-
-      }, refresh_rate * 1000);
-
     }
 
-    //$timeout(render, 200);
+    $timeout(render_map, 200);
 
   }
 
