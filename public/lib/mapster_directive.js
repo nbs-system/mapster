@@ -91,6 +91,7 @@ module.directive('mapster', function (es, $timeout) {
         var circle;
         var route;
         var object;
+        var container;
 
         var color = get_event_color(event);
 
@@ -133,22 +134,23 @@ module.directive('mapster', function (es, $timeout) {
             .attr("class", "route")
             .attr("d", path);
 
-          object = svg.append("path")
+          var width = object_box.width/-2;
+          var height = object_box.height/-2;
+
+          container = svg.append("g");
+          object = container.append("path")
             .style("fill", color)
             .style("stroke", "black")
             .style("stroke-width", 1)
-            //TODO CF above.style("-webkit-transform-origin", "center")
             .attr("class", "object")
             .attr("transform", "scale("+object_scale+")")
+            .attr('transform', 'translate(' + width + ',' + height + ')')
             .attr("d", object_form);
 
-          var node = route.node();
-          var l = node.getTotalLength();
-
           // Animate the object
-          object.transition()
+          container.transition()
             .duration(1500)
-            .attrTween("transform", delta(node))
+            .attrTween("transform", delta(route.node()))
             .remove();
 
         }
