@@ -19,6 +19,11 @@ module.controller('MapsterController', function ($scope, Private) {
 
       var table = table.tables[0];
 
+      if (table == undefined) {
+        $scope.data = null;
+        return;
+      }
+
       console.log(table);
 
       $scope.data = table.rows.map(function(row) {

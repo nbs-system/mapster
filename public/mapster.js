@@ -16,9 +16,10 @@ function mapsterProvider(Private) {
         {
           group: 'metrics',
           name: 'count',
-          title: 'Metric',
+          title: 'Count',
+          aggFilter: ['count'],
           min: 1,
-          max: 1,
+          max: 1
         }, 
         {
           group: 'buckets',
@@ -31,7 +32,7 @@ function mapsterProvider(Private) {
         {
           group: 'buckets',
           name: 'src_coords',
-          icon: 'fa fa-map',
+          icon: 'fa fa-map-marker',
           title: 'Coordinates',
           min: 1,
           max: 1
@@ -39,7 +40,7 @@ function mapsterProvider(Private) {
         {
           group: 'buckets',
           name: 'peer_ip',
-          icon: 'fa fa-map',
+          icon: 'fa fa-server',
           title: 'IP',
           min: 1,
           max: 1
@@ -47,10 +48,18 @@ function mapsterProvider(Private) {
         {
           group: 'buckets',
           name: 'sensor',
-          icon: 'fa fa-map',
+          icon: 'fa fa-signal',
           title: 'Sensor',
           min: 1,
           max: 1
+        },
+        {
+          group: 'buckets',
+          name: 'extra',
+          title: 'Extra data to filter',
+          icon: 'fa fa-database',
+          min: 0,
+          max: 10
         }
     ])
   });
