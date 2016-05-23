@@ -2,9 +2,8 @@ var _ = require('lodash');
 var $ = require('jquery');
 var numeral = require('numeral');
 var dateformat = require('dateformat');
+var d3 = require('d3');
 
-// TODO Remove d3 lib it's already in kibana
-var d3 = require('plugins/mapster/lib/d3.min.js');
 var topojson = require('plugins/mapster/lib/topojson.min.js');
 var geohash = require('plugins/mapster/lib/latlon-geohash.js');
 
@@ -12,7 +11,7 @@ var module = require('ui/modules').get('mapster');
 
 module.directive('mapster', function (es, $timeout) {
 
-  function link (scope, element) {
+  function link ($scope, $element) {
     /* Shared variables */
     var svg, projection, path;
     var circles_death = [];
@@ -26,7 +25,7 @@ module.directive('mapster', function (es, $timeout) {
     const object_height = 24;
 
     /* Render events each time kibana fetches new data */
-    scope.$watch('data', function() {
+    $scope.$watch('data', function() {
       render_events();
     });
 
@@ -58,20 +57,6 @@ module.directive('mapster', function (es, $timeout) {
 
     }
 
-    /* Return the event color */
-    function get_event_color(e) {
-      //TODO Make something more flexible
-      var color = {
-        'apache_404': 'red',
-        'naxsi': 'green',
-        'naxsi_learning': 'yellow',
-        'nginx_auth': 'blue',
-        'naxsi_uwa': 'purple'
-      };
-
-      return color[e["sensor"]];
-    }
-
     /* Set a timeout to remove a circle */
     function prepare_remove_circle(circle) {
       return $timeout(function() {
@@ -93,7 +78,7 @@ module.directive('mapster', function (es, $timeout) {
         var object;
         var container;
 
-        var color = get_event_color(event);
+        var color = $scope.colors[event["sensor"]];
 
         var class_ip = "ip-" + event["peer_ip"].replace(/\./g, "_");
         circle = d3.select("." + class_ip);
@@ -162,7 +147,7 @@ module.directive('mapster', function (es, $timeout) {
       // Remove old useless elements
       $(".route").remove();
 
-      var list = scope.data;
+      var list = $scope.data;
       if (list == undefined) {
         return;
       }
@@ -176,6 +161,7 @@ module.directive('mapster', function (es, $timeout) {
       var wsize = l-f;
       console.log("Window time size:", wsize);
       /* Tmp */
+
 
       var ref_date = new Date(list[0]["timestamp"]);
       var last_date = ref_date;
@@ -210,13 +196,13 @@ module.directive('mapster', function (es, $timeout) {
 
     /* Render the map */
     function render_map() {
-      element.css({
-        height: element.parent().height(),
+      $element.css({
+        height: $element.parent().height(),
         width: '100%'
       });
 
-      var height = element.height();
-      var width = element.width();
+      var height = $element.height();
+      var width = $element.width();
 
       //TODO Compute scale automatically depending on window size
       var scale = (height/300)*100;
@@ -234,8 +220,8 @@ module.directive('mapster', function (es, $timeout) {
 
       // Declare svg elem to make objects appear above the map
       var map = svg.append("svg")
-        .attr("width", element.parent().width())
-        .attr("height", element.parent().height());
+        .attr("width", $element.parent().width())
+        .attr("height", $element.parent().height());
 
       // Draw a sample object to get its size
       var object = svg.append("path")
@@ -258,14 +244,12 @@ module.directive('mapster', function (es, $timeout) {
 
     // First map render is a bit postponed otherwise it does not work
     $timeout(render_map, 100);
+    console.log($scope);
 
   }
 
   return {
     restrict: 'E',
-    scope: {
-      data: '='
-    },
     link: link
   };
 });

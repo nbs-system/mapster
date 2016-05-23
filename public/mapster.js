@@ -1,6 +1,7 @@
 require('plugins/mapster/mapster.less');
 require('plugins/mapster/lib/mapster_controller.js');
 require('plugins/mapster/lib/mapster_directive.js');
+import 'ui/visualize/visualize_legend';
 
 function mapsterProvider(Private) {
   var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
