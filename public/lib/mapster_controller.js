@@ -27,15 +27,17 @@ module.controller('MapsterController', function ($scope, Private) {
       }
 
       var colors = {};
-      var nb_colors = 0;
 
       $scope.data = table.rows.map(function(row) {
         var sensor = row[3].key;
+        // Fill the colors array
         if (colors[sensor] == undefined) {
-          colors[sensor] = '';
-          nb_colors += 1;
+          colors[sensor] = 0;
+        } else {
+          colors[sensor] += 1;
         }
 
+        // Return data rows
         return {
           timestamp: row[0].key,
           coords: row[1].key,
@@ -45,12 +47,17 @@ module.controller('MapsterController', function ($scope, Private) {
         };
       });
 
-      var colors_code = createColorPalette(nb_colors);
-      var i = 0;
+      // We sort it so the most used sensors have always the same color
+      var sorted = [];
       for (var c in colors) {
-        if (c == undefined) break;
-        colors[c] = colors_code[i];
-        i++;
+        sorted.push([c, colors[c]]);
+      }
+      sorted.sort(function(a, b) { return b[1] - a[1]; });
+
+      // Attribute colors
+      var colors_code = createColorPalette(sorted.length);
+      for (var i = 0; i < sorted.length; i++) {
+        colors[sorted[i][0]] = {name: sorted[i][0], color: colors_code[i]};
       }
       $scope.colors = colors;
 

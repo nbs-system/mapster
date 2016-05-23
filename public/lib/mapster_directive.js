@@ -24,6 +24,14 @@ module.directive('mapster', function (es, $timeout) {
     const object_rotation = 90; // The object is oriented to the top
     const object_height = 24;
 
+    if ($scope.open == undefined) {
+      $scope.open = true;
+    }
+
+    $scope.toggleLegend = function() {
+      $scope.open = !$scope.open;
+    }
+
     /* Render events each time kibana fetches new data */
     $scope.$watch('data', function() {
       render_events();
@@ -78,7 +86,7 @@ module.directive('mapster', function (es, $timeout) {
         var object;
         var container;
 
-        var color = $scope.colors[event["sensor"]];
+        var color = $scope.colors[event["sensor"]].color;
 
         var class_ip = "ip-" + event["peer_ip"].replace(/\./g, "_");
         circle = d3.select("." + class_ip);
@@ -122,6 +130,7 @@ module.directive('mapster', function (es, $timeout) {
           var width = object_box.width/-2;
           var height = object_box.height/-2;
 
+          // Container is used to move origin to the center of the object
           container = svg.append("g");
           object = container.append("path")
             .style("fill", color)

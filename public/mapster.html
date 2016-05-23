@@ -1,4 +1,25 @@
 <div ng-controller="MapsterController" class="map">
-    <mapster></mapster>
+    <mapster>
+    <div class="legend-col-wrapper">
+        <div ng-click="toggleLegend()" class="legend-toggle">
+            <i class="legend-icon fa" ng-class="open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left'"></i>
+        </div>
+        <ul class="legend-ul" ng-show="open">
+            <li
+                ng-repeat="event in colors"
+                data-label="{{event.name}}"
+                class="legend-value color">
+
+                <div class="legend-value-container">
+                    <div
+                     ng-class="legend-value-truncate"
+                     class="legend-value-title">
+                        <i class="fa fa-circle" ng-style="{color: event.color}"></i> {{event.name}}
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    </mapster>
 </div>
 
