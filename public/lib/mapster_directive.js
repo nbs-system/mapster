@@ -171,7 +171,7 @@ module.directive('mapster', function (es, $timeout) {
         } else {
           // Create circle
           circle = svg.append("circle")
-            .attr("r", 0)
+            .attr("r", 25)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
             .attr("class", "origin " + class_ip)
