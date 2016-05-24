@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var numeral = require('numeral');
-var dateformat = require('dateformat');
+var dateformat = require('plugins/mapster/lib/dateformat.js');
 var d3 = require('d3');
 
 var topojson = require('plugins/mapster/lib/topojson.min.js');

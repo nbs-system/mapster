@@ -28,8 +28,18 @@ module.controller('MapsterController', function ($scope, Private) {
 
       var colors = {};
 
+      // Get the sensor column
+      var sensorAggId = $scope.vis.aggs.bySchemaName['sensor'][0].id;
+      var sensorColumn = 0;
+      for (var i = 0; i < table.columns.length; i++) {
+        if (table.columns[i].aggConfig.id == sensorAggId) {
+          sensorColumn = i;
+          break;
+        }
+      }
+
       $scope.data = table.rows.map(function(row) {
-        var sensor = row[3].key;
+        var sensor = row[sensorColumn].key;
         // Fill the colors array
         if (colors[sensor] == undefined) {
           colors[sensor] = 0;
@@ -38,6 +48,7 @@ module.controller('MapsterController', function ($scope, Private) {
         }
 
         // Return data rows
+        // TODO Order might not be respected, check sensor above
         return {
           timestamp: row[0].key,
           coords: row[1].key,
