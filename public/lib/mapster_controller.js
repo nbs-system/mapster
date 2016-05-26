@@ -1,12 +1,11 @@
 var _ = require('lodash');
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
 
 var module = require('ui/modules').get('mapster');
 
 module.controller('MapsterController', function ($scope, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
-  const createColorPalette = Private(VislibComponentsColorColorPaletteProvider);
+  const palette = ['#DC143C', '#FFD700', '#228B22', '#20B2AA', '#FF00FF', '#D2691E', '#FA8072', '#006400', '#0000CD', '#9400D3', '#A0522D', '#00BFFF', '#3CB371', '#7CFC00', '#8B0000', '#EEE8AA', '#00FF7F','#87CEFA', '#FF69B4', '#B0C4DE'];
 
   $scope.$watch('esResponse', function (resp) {
     if (resp) {
@@ -48,7 +47,7 @@ module.controller('MapsterController', function ($scope, Private) {
         }
 
         // Return data rows
-        // TODO Order might not be respected, check sensor above
+        // TODO The rows order might not be respected, check sensor column above
         return {
           timestamp: row[0].key,
           coords: row[1].key,
@@ -66,9 +65,8 @@ module.controller('MapsterController', function ($scope, Private) {
       sorted.sort(function(a, b) { return b[1] - a[1]; });
 
       // Attribute colors
-      var colors_code = createColorPalette(sorted.length);
       for (var i = 0; i < sorted.length; i++) {
-        colors[sorted[i][0]] = {name: sorted[i][0], color: colors_code[i]};
+        colors[sorted[i][0]] = {name: sorted[i][0], color: palette[i]};
       }
       $scope.colors = colors;
 

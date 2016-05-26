@@ -66,7 +66,7 @@ module.directive('mapster', function (es, $timeout) {
           .attr("r", 0)
           .duration(1000)
           .remove();
-      }, 10000);
+      }, 30000);
     }
 
     /* Set a timeout to display a specific event */
@@ -97,19 +97,36 @@ module.directive('mapster', function (es, $timeout) {
         } else {
           // Create circle
           circle = svg.append("circle")
-            .attr("r", 0)
+            .attr("r", 4)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
             .attr("class", "origin " + class_ip)
             .style("fill", color)
-            .style("stroke", "black")
+            .style("stroke", "#333")
             .style("stroke-width", 1);
-
-          // Make it bigger smoothly
-          circle.transition()
-            .duration(1000)
-            .attr("r", 3);
         }
+
+        // Create a halo
+        var halo = svg.append("circle")
+          .attr("r", 4)
+          .attr("cx", projection(coords)[0])
+          .attr("cy", projection(coords)[1])
+          .attr("class", "halo " + class_ip);
+
+        // Make the halo grow and disappear
+        halo.transition()
+          .duration(2000)
+          .attr("r", 15)
+          .ease("linear")
+          .each("end", function() {
+            var halo = d3.select(this);
+            halo.transition()
+              .ease("linear")
+              .duration(1000)
+              .attr("r", 20)
+              .style("opacity", 0)
+              .remove();
+          });
 
         // Tell it to die in the future
         circles_death[class_ip] = prepare_remove_circle(circle);
