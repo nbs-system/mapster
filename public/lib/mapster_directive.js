@@ -185,8 +185,9 @@ module.directive('mapster', function (es, $timeout) {
             .attr("d", object_shape);
 
           // Animate the object
+          var path_duration = 4000;
           container.transition()
-            .duration(4000)
+            .duration(path_duration)
             .attrTween("transform", delta(route.node(), object_scale*2))
             .remove();
 
@@ -231,7 +232,7 @@ module.directive('mapster', function (es, $timeout) {
 
           // Tell it to die in the future
           circles_death[class_ip] = prepare_remove_circle(circle);
-        }, diff + 4000);
+        }, path_duration);
 
       }, diff);
     }
