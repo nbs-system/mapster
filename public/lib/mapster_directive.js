@@ -41,7 +41,7 @@ module.directive('mapster', function (es, $timeout) {
     }
 
     /* Transform the object rotation/position etc. */
-    function delta(node) {
+    function delta(node, scale) {
       var l = node.getTotalLength();
       return function(i) {
         return function(t) {
@@ -53,7 +53,7 @@ module.directive('mapster', function (es, $timeout) {
           var y = p2.y - p.y;
           var r = object_rotation - Math.atan2(-y, x) * 180 / Math.PI;
 
-          return "translate(" + p.x + "," + p.y + ") scale(" + object_scale + ") rotate(" + r + ")";
+          return "translate(" + p.x + "," + p.y + ") scale(" + scale + ") rotate(" + r + ")";
         }
       }
 
@@ -75,15 +75,10 @@ module.directive('mapster', function (es, $timeout) {
         var coords = geohash.decode(event["coords"]);
         coords = getCoords([coords.lat, coords.lon]);
 
-        var circle;
-        var route;
-        var object;
-        var container;
-
         var color = $scope.colors[event["sensor"]].color;
 
         var class_ip = "ip-" + event["peer_ip"].replace(/\./g, "_");
-        circle = d3.select("." + class_ip);
+        var circle = d3.select("." + class_ip);
         if (circle[0][0]) {
           // Already exists, make it bigger !
           var size = parseInt(circle.attr("r")) + 1;
@@ -133,7 +128,7 @@ module.directive('mapster', function (es, $timeout) {
 
         // Draw the path and the object
         if (object_box != null) {
-          route = svg.append("path")
+          var route = svg.append("path")
             .datum({type: "LineString", coordinates:[coords, target_coords]})
             .attr("class", "route")
             .attr("d", path);
@@ -142,8 +137,8 @@ module.directive('mapster', function (es, $timeout) {
           var height = object_box.height/-2;
 
           // Container is used to move origin to the center of the object
-          container = svg.append("g");
-          object = container.append("path")
+          var container = svg.append("g");
+          var object = container.append("path")
             .style("fill", color)
             .style("stroke", "black")
             .style("stroke-width", 1)
@@ -155,7 +150,7 @@ module.directive('mapster', function (es, $timeout) {
             // Animate the object
             container.transition()
             .duration(1500)
-            .attrTween("transform", delta(route.node()))
+            .attrTween("transform", delta(route.node(), object_scale))
             .remove();
 
             }
@@ -168,42 +163,76 @@ module.directive('mapster', function (es, $timeout) {
         var coords = geohash.decode(event["coords"]);
         coords = getCoords([coords.lat, coords.lon]);
 
-        var circle;
-        var container;
+        // Draw the path and the object
+        if (object_box != null) {
+          var route = svg.append("path")
+            .datum({type: "LineString", coordinates:[target_coords, coords]})
+            .attr("class", "route")
+            .attr("d", path);
 
+          var width = object_box.width/-2;
+          var height = object_box.height/-2;
+
+          // Container is used to move origin to the center of the object
+          var container = svg.append("g");
+          var object = container.append("path")
+            .style("fill", "orange")
+            .style("stroke", "black")
+            .style("stroke-width", 1)
+            .attr("class", "object")
+            .attr("transform", "scale(" + object_scale*2 + ")")
+            .attr('transform', 'translate(' + width + ',' + height + ')')
+            .attr("d", object_shape);
+
+          // Animate the object
+          container.transition()
+            .duration(4000)
+            .attrTween("transform", delta(route.node(), object_scale*2))
+            .remove();
+
+        }
+        
         var color = $scope.colors[event["sensor"]].color;
+        var class_ip = "ban_ip-" + event["peer_ip"].replace(/\./g, "_");
 
-        var class_ip = "special ip-" + event["peer_ip"].replace(/\./g, "_");
-        circle = d3.select("." + class_ip);
-        if (circle[0][0]) {
-          // Already exists, make it bigger !
-          var size = parseInt(circle.attr("r")) + 1;
-          if (size > 15) size = 15;
-          circle.transition()
-            .duration(3000)
-            .attr("r", size);
-
-          // Don't die !
-          $timeout.cancel(circles_death[class_ip]);
-        } else {
+        $timeout(function() {
           // Create circle
-          circle = svg.append("circle")
-            .attr("r", 25)
+          var circle = svg.append("circle")
+            .attr("r", 4)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
             .attr("class", "origin " + class_ip)
             .style("fill", color)
+            .style("stroke", "#333")
+            .style("stroke-width", 1);
+        
+          // Create a halo
+          var halo = svg.append("circle")
+            .attr("r", 4)
             .style("stroke", "red")
-            .style("stroke-width", 2);
+            .attr("cx", projection(coords)[0])
+            .attr("cy", projection(coords)[1])
+            .attr("class", "halo " + class_ip);
 
-          // Make it bigger smoothly
-          circle.transition()
+          // Make the halo grow and disappear
+          halo.transition()
             .duration(2000)
-            .attr("r", 5);
-        }
+            .attr("r", 15)
+            .ease("linear")
+            .each("end", function() {
+              var halo = d3.select(this);
+              halo.transition()
+                .ease("linear")
+                .duration(1000)
+                .attr("r", 20)
+                .style("opacity", 0)
+                .remove();
+            });
 
-        // Tell it to die in the future
-        circles_death[class_ip] = prepare_remove_circle(circle);
+          // Tell it to die in the future
+          circles_death[class_ip] = prepare_remove_circle(circle);
+        }, diff + 4000);
+
       }, diff);
     }
 
