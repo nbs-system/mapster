@@ -14,15 +14,19 @@ module.directive('mapster', function (es, $timeout) {
   function link ($scope, $element) {
     /* Shared variables */
     var svg, projection, path;
-    var circles_death = [];
+    var origin_death = [];
     var object_box = null;
+    var special_box = null;
 
     /* Constants */
     var coords = $scope.vis.params.target_coords.replace(/ /g, "").split(',');
     const target_coords = getCoords([parseInt(coords[0]), parseInt(coords[1])]);
     const object_shape = $scope.vis.params.object_shape;
     const object_scale = parseFloat($scope.vis.params.object_scale);
-    const object_rotation = parseInt($scope.vis.params.object_rotation); // The object is oriented to the top
+    const object_rotation = parseInt($scope.vis.params.object_rotation);
+    const special_shape = $scope.vis.params.special_shape;
+    const special_shape_scale = parseFloat($scope.vis.params.special_shape_scale);
+    const special_shape_remaining = parseInt($scope.vis.params.special_shape_remaining);
 
     $scope.open = $scope.open || true;
 
@@ -33,6 +37,11 @@ module.directive('mapster', function (es, $timeout) {
     /* Render events each time kibana fetches new data */
     $scope.$watch('data', function() {
       render_events();
+    });
+
+    /* Redraw everything when options are modified */
+    $scope.$watch('vis.params', function() {
+      console.log("Options where modified");
     });
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
@@ -60,13 +69,13 @@ module.directive('mapster', function (es, $timeout) {
     }
 
     /* Set a timeout to remove a circle */
-    function prepare_remove_circle(circle) {
+    function prepare_remove_origin(origin, time=30000) {
       return $timeout(function() {
-        circle.transition()
+        origin.transition()
           .attr("r", 0)
           .duration(1000)
           .remove();
-      }, 30000);
+      }, time);
     }
 
     /* Set a timeout to display a specific event */
@@ -88,7 +97,7 @@ module.directive('mapster', function (es, $timeout) {
             .attr("r", size);
 
           // Don't die !
-          $timeout.cancel(circles_death[class_ip]);
+          $timeout.cancel(origin_death[class_ip]);
         } else {
           // Create circle
           circle = svg.append("circle")
@@ -124,7 +133,7 @@ module.directive('mapster', function (es, $timeout) {
           });
 
         // Tell it to die in the future
-        circles_death[class_ip] = prepare_remove_circle(circle);
+        origin_death[class_ip] = prepare_remove_origin(circle);
 
         // Draw the path and the object
         if (object_box != null) {
@@ -133,7 +142,7 @@ module.directive('mapster', function (es, $timeout) {
             .attr("class", "route")
             .attr("d", path);
 
-          var width = object_box.width/-2;
+          var width = object_box.width/-2; //TODO Wtf scale is not needed here but below yes
           var height = object_box.height/-2;
 
           // Container is used to move origin to the center of the object
@@ -142,21 +151,18 @@ module.directive('mapster', function (es, $timeout) {
             .style("fill", color)
             .style("stroke", "black")
             .style("stroke-width", 1)
-            .attr("class", "object")
-            .attr("transform", "scale("+object_scale+")")
             .attr('transform', 'translate(' + width + ',' + height + ')')
             .attr("d", object_shape);
 
             // Animate the object
             container.transition()
-            .duration(1500)
+            .duration(2000)
             .attrTween("transform", delta(route.node(), object_scale))
             .remove();
 
             }
         }, diff);
     }
-
 
     function show_special_event(event, diff) {
       $timeout(function() {
@@ -170,7 +176,7 @@ module.directive('mapster', function (es, $timeout) {
             .attr("class", "route")
             .attr("d", path);
 
-          var width = object_box.width/-2;
+          var width = object_box.width/-2; //TODO Wtf scale is not needed here but below yes
           var height = object_box.height/-2;
 
           // Container is used to move origin to the center of the object
@@ -179,14 +185,13 @@ module.directive('mapster', function (es, $timeout) {
             .style("fill", "orange")
             .style("stroke", "black")
             .style("stroke-width", 1)
-            .attr("class", "object")
-            .attr("transform", "scale(" + object_scale*2 + ")")
-            .attr('transform', 'translate(' + width + ',' + height + ')')
+            .attr("transform", "translate(" + width + "," + height + ")")
             .attr("d", object_shape);
 
           // Animate the object
           var path_duration = 4000;
           container.transition()
+            .ease("linear")
             .duration(path_duration)
             .attrTween("transform", delta(route.node(), object_scale*2))
             .remove();
@@ -196,42 +201,48 @@ module.directive('mapster', function (es, $timeout) {
         var color = $scope.colors[event["sensor"]].color;
         var class_ip = "ban_ip-" + event["peer_ip"].replace(/\./g, "_");
 
+
         $timeout(function() {
-          // Create circle
-          var circle = svg.append("circle")
-            .attr("r", 4)
-            .attr("cx", projection(coords)[0])
-            .attr("cy", projection(coords)[1])
-            .attr("class", "origin " + class_ip)
-            .style("fill", color)
-            .style("stroke", "#333")
-            .style("stroke-width", 1);
+          // Create origin cross
+          var width = special_shape_scale * special_box.width/-2;
+          var height = special_shape_scale * special_box.height/-2;
+
+          // Container is used to move origin to the center of the object
+          var container = svg.append("g")
+          var origin = container.append("path")
+            .style("fill", "red")
+            .style("stroke", "black")
+            .style("stroke-width", 1)
+            .attr("transform", "translate(" + width + "," + height + ") scale(" + special_shape_scale + ")")
+            .attr("d", special_shape);
+          container.attr("transform", "translate(" + projection(coords)[0]+ "," + projection(coords)[1] + ")");
         
           // Create a halo
           var halo = svg.append("circle")
-            .attr("r", 4)
+            .attr("r", 10)
             .style("stroke", "red")
+            .style("stroke-width", 2)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
             .attr("class", "halo " + class_ip);
 
           // Make the halo grow and disappear
           halo.transition()
-            .duration(2000)
-            .attr("r", 15)
+            .duration(3000)
+            .attr("r", 25)
             .ease("linear")
             .each("end", function() {
               var halo = d3.select(this);
               halo.transition()
                 .ease("linear")
                 .duration(1000)
-                .attr("r", 20)
+                .attr("r", 30)
                 .style("opacity", 0)
                 .remove();
             });
 
           // Tell it to die in the future
-          circles_death[class_ip] = prepare_remove_circle(circle);
+          origin_death[class_ip] = prepare_remove_origin(origin, special_shape_remaining);
         }, path_duration);
 
       }, diff);
@@ -270,6 +281,7 @@ module.directive('mapster', function (es, $timeout) {
           last_date = date;
           index = 0;
         }
+
         /* Recount events with same timestamp */
         if (count == 0) {
           for (var j = i; j < list.length-1; j++) {
@@ -322,9 +334,16 @@ module.directive('mapster', function (es, $timeout) {
 
       // Draw a sample object to get its size
       var object = svg.append("path")
+        .attr("transform", "scale(" + object_scale + ")")
         .attr("d", object_shape);
       object_box = object.node().getBBox();
       object.remove();
+
+      // Draw a sample special object to get its size
+      var special = svg.append("path")
+        .attr("d", special_shape);
+      special_box = special.node().getBBox();
+      special.remove();
 
       // Draw d3 map
       // The first '/' in the url below is required to really access http://url/plugins/... and not app/plugins
