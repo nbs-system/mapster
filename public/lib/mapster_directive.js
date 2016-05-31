@@ -20,6 +20,9 @@ module.directive('mapster', function (es, $timeout) {
 
     /* Constants */
     var coords = $scope.vis.params.target_coords.replace(/ /g, "").split(',');
+    const origin_default_size = parseInt($scope.vis.params.origin_default_size);
+    const origin_maximum_size = 14; // TODO Set it as a param ?
+    const origin_dying_time = 10; // TODO Set it as a param ?
     const target_coords = getCoords([parseInt(coords[0]), parseInt(coords[1])]);
     const object_shape = $scope.vis.params.object_shape;
     const object_scale = parseFloat($scope.vis.params.object_scale);
@@ -68,14 +71,22 @@ module.directive('mapster', function (es, $timeout) {
 
     }
 
-    /* Set a timeout to remove a circle */
-    function prepare_remove_origin(origin, time=30000) {
-      return $timeout(function() {
+    /* Set a timeout to remove an origin */
+    function remove_origin(origin, time, delay) {
+      var promise = $timeout(function() {
         origin.transition()
+          .ease("linear")
           .attr("r", 0)
-          .duration(1000)
+          .duration(time)
+          .each("end", function() {
+            // Remove IPs from origin_death array (free memory)
+            var class_ip = origin[0][0].classList[1];
+            delete origin_death[class_ip];
+          })
           .remove();
-      }, time);
+      }, delay);
+
+      return promise;
     }
 
     /* Set a timeout to display a specific event */
@@ -87,21 +98,28 @@ module.directive('mapster', function (es, $timeout) {
         var color = $scope.colors[event["sensor"]].color;
 
         var class_ip = "ip-" + event["peer_ip"].replace(/\./g, "_");
-        var circle = d3.select("." + class_ip);
-        if (circle[0][0]) {
-          // Already exists, make it bigger !
-          var size = parseInt(circle.attr("r")) + 1;
-          if (size > 10) size = 10;
-          circle.transition()
-            .duration(2000)
-            .attr("r", size);
+        var origin = d3.select("." + class_ip);
 
-          // Don't die !
+        if (origin[0][0]) {
+          // Already exists, stop dying !
           $timeout.cancel(origin_death[class_ip]);
+          delete origin_death[class_ip];
+
+          // Make it bigger now :)
+          var size = parseInt(origin.attr("r"));
+          if (size < origin_default_size/2) {
+            size = origin_default_size;
+          } else if (size > origin_maximum_size) {
+            size = origin_maximum_size;
+          } else {
+            size += origin_default_size;
+          }
+
+          origin.attr("r", size);
         } else {
-          // Create circle
-          circle = svg.append("circle")
-            .attr("r", 4)
+          // Create origin
+          origin = svg.append("circle")
+            .attr("r", origin_default_size)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
             .attr("class", "origin " + class_ip)
@@ -112,7 +130,7 @@ module.directive('mapster', function (es, $timeout) {
 
         // Create a halo
         var halo = svg.append("circle")
-          .attr("r", 4)
+          .attr("r", origin_default_size)
           .attr("cx", projection(coords)[0])
           .attr("cy", projection(coords)[1])
           .attr("class", "halo " + class_ip);
@@ -120,20 +138,22 @@ module.directive('mapster', function (es, $timeout) {
         // Make the halo grow and disappear
         halo.transition()
           .duration(2000)
-          .attr("r", 15)
+          .attr("r", origin_default_size*4)
           .ease("linear")
           .each("end", function() {
             var halo = d3.select(this);
             halo.transition()
               .ease("linear")
               .duration(1000)
-              .attr("r", 20)
+              .attr("r", origin_default_size*5)
               .style("opacity", 0)
               .remove();
           });
 
-        // Tell it to die in the future
-        origin_death[class_ip] = prepare_remove_origin(circle);
+        // Make the origin die slowly
+        var size = parseInt(origin.attr("r"));
+        var time = origin_dying_time*size/origin_default_size * 1000;
+        origin_death[class_ip] = remove_origin(origin, time, 0);
 
         // Draw the path and the object
         if (object_box != null) {
@@ -201,7 +221,6 @@ module.directive('mapster', function (es, $timeout) {
         var color = $scope.colors[event["sensor"]].color;
         var class_ip = "ban_ip-" + event["peer_ip"].replace(/\./g, "_");
 
-
         $timeout(function() {
           // Create origin cross
           var width = special_shape_scale * special_box.width/-2;
@@ -242,7 +261,7 @@ module.directive('mapster', function (es, $timeout) {
             });
 
           // Tell it to die in the future
-          origin_death[class_ip] = prepare_remove_origin(origin, special_shape_remaining);
+          origin_death[class_ip] = remove_origin(origin, 5000, special_shape_remaining);
         }, path_duration);
 
       }, diff);
