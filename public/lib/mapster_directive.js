@@ -5,7 +5,6 @@ var dateformat = require('plugins/mapster/lib/dateformat.js');
 var d3 = require('d3');
 
 var topojson = require('plugins/mapster/lib/topojson.min.js');
-var geohash = require('plugins/mapster/lib/latlon-geohash.js');
 
 var module = require('ui/modules').get('mapster');
 
@@ -30,6 +29,7 @@ module.directive('mapster', function (es, $timeout) {
     var special_shape;
     var special_shape_scale;
     var special_shape_remaining;
+    var hide_unlocated;
     load_config();
 
     $scope.open = $scope.open || true;
@@ -58,6 +58,7 @@ module.directive('mapster', function (es, $timeout) {
       special_shape = $scope.vis.params.special_shape;
       special_shape_scale = parseFloat($scope.vis.params.special_shape_scale);
       special_shape_remaining = parseInt($scope.vis.params.special_shape_remaining);
+      hide_unlocated = $scope.vis.params.hide_unlocated;
     };
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
@@ -105,8 +106,7 @@ module.directive('mapster', function (es, $timeout) {
     /* Set a timeout to display a specific event */
     function show_event(event, diff) {
       $timeout(function() {
-        var coords = geohash.decode(event["coords"]);
-        coords = getCoords([coords.lat, coords.lon]);
+        var coords = getCoords([event["coords"].lat, event["coords"].lon]);
 
         var color = $scope.colors[event["sensor"]].color;
 
@@ -199,7 +199,6 @@ module.directive('mapster', function (es, $timeout) {
 
     function show_special_event(event, diff) {
       $timeout(function() {
-        var coords = geohash.decode(event["coords"]);
         coords = getCoords([coords.lat, coords.lon]);
 
         // Draw the path and the object
@@ -327,10 +326,20 @@ module.directive('mapster', function (es, $timeout) {
         /* Make events with same timestamp appear smoothly/distributively on 1 second */
         var diff = date - ref_date;
         diff = diff + 1000/count * index;
+
         if (list[i]["sensor"] == $scope.vis.params.special_effects) {
           show_special_event(list[i], diff);
         } else {
-          show_event(list[i], diff);
+          /* Should we display unlocated events ? */
+          if (hide_unlocated) {
+            var coords = list[i]["coords"];
+            var unlocated = ('' + coords.lat).substr(0, 1) == 0 && ('' + coords.lon).substr(0, 1) == 0;
+            if (!unlocated) {
+              show_event(list[i], diff);
+            }
+          } else {
+            show_event(list[i], diff);
+          }
         }
         index++;
       }

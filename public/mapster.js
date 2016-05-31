@@ -25,7 +25,8 @@ function mapsterProvider(Private) {
         special_shape_remaining: 600000,
         origin_default_size: 4,
         origin_maximum_size: 14,
-        origin_dying_time: 10
+        origin_dying_time: 10,
+        hide_unlocated: false
       },
       editor: require('plugins/mapster/mapster_params_editor.html')
     },

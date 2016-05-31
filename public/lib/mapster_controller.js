@@ -1,4 +1,6 @@
 var _ = require('lodash');
+var geohash = require('plugins/mapster/lib/latlon-geohash.js');
+
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 
 var module = require('ui/modules').get('mapster');
@@ -50,7 +52,7 @@ module.controller('MapsterController', function ($scope, Private) {
         // TODO The rows order might not be respected, check sensor column above
         return {
           timestamp: row[0].key,
-          coords: row[1].key,
+          coords: geohash.decode(row[1].key),
           peer_ip: row[2].key,
           sensor: sensor, 
           count: row[4].key
