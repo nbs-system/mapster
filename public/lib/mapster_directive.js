@@ -333,7 +333,7 @@ module.directive('mapster', function (es, $timeout) {
           /* Should we display unlocated events ? */
           if (hide_unlocated) {
             var coords = list[i]["coords"];
-            var unlocated = ('' + coords.lat).substr(0, 1) == 0 && ('' + coords.lon).substr(0, 1) == 0;
+            var unlocated = (coords | 0) == 0 && (coords.lon | 0) == 0;
             if (!unlocated) {
               show_event(list[i], diff);
             }
