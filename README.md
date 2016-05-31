@@ -37,9 +37,9 @@ To add Mapster to a dashboard, first create a new [visualization](https://www.el
 ## Choosing correct aggregations
 The metric should be set to `Count`.
 
-The first aggregation is as described the Timestamp matching the event. You should use a `Date Histogram` with the Interval set to `Seconds`.
+The first aggregation is as described the timestamp matching the event. You should use a `Date Histogram` with the Interval set to `Seconds`.
 
-The second aggregation is the event coordinates so you have to use a Geohash matching the event's origin.
+The second aggregation is the event coordinates so you have to use a `Geohash` matching the event's origin.
 
 The third aggregation is the target IP. It is used to aggregate multiple events from the same IP on the map.
 
@@ -48,17 +48,20 @@ The fourth aggregation is the sensor. The sensor is used to differentiate event 
 Then you can add any other aggregation if you need to filter your events using the kibana search field.
 
 ## Plugin options
-| Option name | Meaning |
-|-------------|---------|
-| Special effects | The sensor field used to display it has a special effect. |
-| Object shape | The svg shape of the object thrown from the origin to the target. |
-| Object scale | The scale of the above shape. |
-| Object rotation | The object rotation. If the object is looking to the top, the rotation is 90 degrees. |
-| Target coords | This is the location on the map of the target. |
-| Special shape | Shape used to mark a special event on the map. |
-| Special scale | The scale of the above shape. |
-| Special remaining time | The duration the special shape stays on the map. |
-| Origin default size | The default size of a circle (origin). |
-| Origin maximum size | The maximum size used to avoid having too big circles. |
-| Origin dying time | The time the origin dies. |
+| Option name              | Meaning                                                                               |
+|--------------------------|---------------------------------------------------------------------------------------|
+| Special effects          | The sensor field used to display the event as a special effect.                       |
+| Object shape             | The svg shape of the object thrown from the origin to the target.                     |
+| Object scale             | The scale of the above shape.                                                         |
+| Object rotation          | The object rotation. If the object is looking to the top, the rotation is 90 degrees. |
+| Target coords            | This is the location on the map of the target.                                        |
+| Special shape            | Shape used to mark a special event on the map.                                        |
+| Special scale            | The scale of the above shape.                                                         |
+| Special remaining time   | The duration the special shape stays on the map.                                      |
+| Origin default size      | The default size of a circle (origin).                                                |
+| Origin maximum size      | The maximum size used to avoid having too big circles.                                |
+| Origin dying time        | The time the origin dies.                                                             |
 
+
+# Screenshots
+![Mapster](/docs/mapster.png?raw=true "Mapster")
