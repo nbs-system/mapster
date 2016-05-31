@@ -18,18 +18,19 @@ module.directive('mapster', function (es, $timeout) {
     var object_box = null;
     var special_box = null;
 
-    /* Constants */
-    var coords = $scope.vis.params.target_coords.replace(/ /g, "").split(',');
-    const origin_default_size = parseInt($scope.vis.params.origin_default_size);
-    const origin_maximum_size = 14; // TODO Set it as a param ?
-    const origin_dying_time = 10; // TODO Set it as a param ?
-    const target_coords = getCoords([parseInt(coords[0]), parseInt(coords[1])]);
-    const object_shape = $scope.vis.params.object_shape;
-    const object_scale = parseFloat($scope.vis.params.object_scale);
-    const object_rotation = parseInt($scope.vis.params.object_rotation);
-    const special_shape = $scope.vis.params.special_shape;
-    const special_shape_scale = parseFloat($scope.vis.params.special_shape_scale);
-    const special_shape_remaining = parseInt($scope.vis.params.special_shape_remaining);
+    /* Constants TODO Use `const` instead of `var` but what happens when load_config is called ? */
+    var coords;
+    var origin_default_size;
+    var origin_maximum_size;
+    var origin_dying_time;
+    var target_coords;
+    var object_shape;
+    var object_scale;
+    var object_rotation;
+    var special_shape;
+    var special_shape_scale;
+    var special_shape_remaining;
+    load_config();
 
     $scope.open = $scope.open || true;
 
@@ -43,9 +44,21 @@ module.directive('mapster', function (es, $timeout) {
     });
 
     /* Redraw everything when options are modified */
-    $scope.$watch('vis.params', function() {
-      console.log("Options where modified");
-    });
+    $scope.$watch('vis.params', load_config);
+
+    function load_config() {
+      coords = $scope.vis.params.target_coords.replace(/ /g, "").split(',');
+      origin_default_size = parseInt($scope.vis.params.origin_default_size);
+      origin_maximum_size = parseInt($scope.vis.params.origin_maximum_size);
+      origin_dying_time = parseInt($scope.vis.params.origin_dying_time);
+      target_coords = getCoords([parseInt(coords[0]), parseInt(coords[1])]);
+      object_shape = $scope.vis.params.object_shape;
+      object_scale = parseFloat($scope.vis.params.object_scale);
+      object_rotation = parseInt($scope.vis.params.object_rotation);
+      special_shape = $scope.vis.params.special_shape;
+      special_shape_scale = parseFloat($scope.vis.params.special_shape_scale);
+      special_shape_remaining = parseInt($scope.vis.params.special_shape_remaining);
+    };
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
     function getCoords(coords) {
