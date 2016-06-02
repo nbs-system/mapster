@@ -205,18 +205,31 @@ module.directive('mapster', function (es, $timeout) {
           var duration = 2000;
 
           // Animate the route
+          var max_length = route.node().getTotalLength();
+          var length = max_length*0.1;
           route.transition()
             .duration(duration)
-            .attrTween("stroke-dasharray", function () {
-              var l = route.node().getTotalLength();
-              var i = d3.interpolateString("0," + l, l + "," + l);
-              return function(t) { /*console.log(l, i, t);*/ return i(t); };
+            .ease("linear")
+            .attr("stroke-dasharray", length + ", " + max_length)
+            .attrTween("stroke-dashoffset", function() {
+              return function(t) {
+                return length - t*max_length;
+              }
             })
+            .transition()
+              .duration(duration*0.1)
+              .ease("linear")
+              .attrTween("stroke-dashoffset", function() {
+                return function(t) {
+                  return length - max_length - t*length;
+                }
+              })
             .remove();
 
           // Animate the object
           container.transition()
             .duration(duration)
+            .ease("linear")
             .attrTween("transform", delta(route.node(), object_scale))
             .remove();
 
