@@ -34,6 +34,7 @@ module.directive('mapster', function (es, $timeout) {
     var explosion_file;
     var explosion_width;
     var explosion_height;
+    var explosion_delay;
 
     $scope.open = $scope.open || true;
 
@@ -66,6 +67,7 @@ module.directive('mapster', function (es, $timeout) {
       explosion_file = $scope.vis.params.explosion_file;
       explosion_height = parseInt($scope.vis.params.explosion_height);
       explosion_width = parseInt($scope.vis.params.explosion_width);
+      explosion_delay = parseInt($scope.vis.params.explosion_delay);
     }
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
@@ -105,6 +107,12 @@ module.directive('mapster', function (es, $timeout) {
             delete origin_death[class_ip];
           })
           .remove();
+      }, delay);
+    }
+
+    function remove_explosion(explosion, delay) {
+      $timeout(function() {
+        explosion.remove();
       }, delay);
     }
 
@@ -201,7 +209,8 @@ module.directive('mapster', function (es, $timeout) {
             .duration(duration)
             .attrTween("stroke-dasharray", function () {
               var l = route.node().getTotalLength();
-              return d3.interpolateString("0," + l, l + "," + l);
+              var i = d3.interpolateString("0," + l, l + "," + l);
+              return function(t) { /*console.log(l, i, t);*/ return i(t); };
             })
             .remove();
 
@@ -295,14 +304,18 @@ module.directive('mapster', function (es, $timeout) {
 
           // Create explosion
           if (enable_explosion) {
-            svg.append("svg:image")
+            var explosion = svg.append("svg:image")
               .attr("class", "explosion")
-              .attr("xlink:href", "/plugins/mapster/img/" + explosion_file)
+              .attr("xlink:href", "/plugins/mapster/img/" + explosion_file + "?" + Date.now()) // ?param is a little trick to force gif to reload
               .attr("width", explosion_width)
               .attr("height", explosion_height)
               .attr("x", projection(coords)[0]-explosion_width/2)
               .attr("y", projection(coords)[1]-explosion_height);
+            remove_explosion(explosion, explosion_delay);
           }
+
+          // Remove route
+          route.remove();
         }, path_duration);
 
       }, diff);
@@ -311,10 +324,6 @@ module.directive('mapster', function (es, $timeout) {
 
     /* Render events in the data scope */
     function render_events() {
-      if (enable_explosion) {
-        $(".explosion").remove();
-      }
-
       var list = $scope.data;
       if (list == undefined) {
         return;

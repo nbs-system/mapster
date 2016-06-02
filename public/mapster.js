@@ -30,7 +30,8 @@ function mapsterProvider(Private) {
         enable_explosion: true,
         explosion_file: "explosion.gif",
         explosion_height: 60,
-        explosion_width: 60
+        explosion_width: 60,
+        explosion_delay: 2700
       },
       editor: require('plugins/mapster/mapster_params_editor.html')
     },
