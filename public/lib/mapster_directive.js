@@ -30,6 +30,10 @@ module.directive('mapster', function (es, $timeout) {
     var special_shape_scale;
     var special_shape_remaining;
     var hide_unlocated;
+    var enable_explosion;
+    var explosion_file;
+    var explosion_width;
+    var explosion_height;
 
     $scope.open = $scope.open || true;
 
@@ -58,6 +62,10 @@ module.directive('mapster', function (es, $timeout) {
       special_shape_scale = parseFloat($scope.vis.params.special_shape_scale);
       special_shape_remaining = parseInt($scope.vis.params.special_shape_remaining);
       hide_unlocated = $scope.vis.params.hide_unlocated;
+      enable_explosion = $scope.vis.params.enable_explosion;
+      explosion_file = $scope.vis.params.explosion_file;
+      explosion_height = parseInt($scope.vis.params.explosion_height);
+      explosion_width = parseInt($scope.vis.params.explosion_width);
     }
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
@@ -209,7 +217,7 @@ module.directive('mapster', function (es, $timeout) {
 
     function show_special_event(event, diff) {
       $timeout(function () {
-        coords = getCoords([coords.lat, coords.lon]);
+        var coords = getCoords([event["coords"].lat, event["coords"].lon]);
 
         // Draw the path and the object
         if (object_box != null) {
@@ -284,6 +292,17 @@ module.directive('mapster', function (es, $timeout) {
 
           // Tell it to die in the future
           origin_death[class_ip] = remove_origin(origin, 5000, special_shape_remaining);
+
+          // Create explosion
+          if (enable_explosion) {
+            svg.append("svg:image")
+              .attr("class", "explosion")
+              .attr("xlink:href", "/plugins/mapster/img/" + explosion_file)
+              .attr("width", explosion_width)
+              .attr("height", explosion_height)
+              .attr("x", projection(coords)[0]-explosion_width/2)
+              .attr("y", projection(coords)[1]-explosion_height);
+          }
         }, path_duration);
 
       }, diff);
@@ -292,6 +311,10 @@ module.directive('mapster', function (es, $timeout) {
 
     /* Render events in the data scope */
     function render_events() {
+      if (enable_explosion) {
+        $(".explosion").remove();
+      }
+
       var list = $scope.data;
       if (list == undefined) {
         return;

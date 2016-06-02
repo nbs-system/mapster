@@ -26,7 +26,11 @@ function mapsterProvider(Private) {
         origin_default_size: 4,
         origin_maximum_size: 14,
         origin_dying_time: 10,
-        hide_unlocated: false
+        hide_unlocated: false,
+        enable_explosion: true,
+        explosion_file: "explosion.gif",
+        explosion_height: 60,
+        explosion_width: 60
       },
       editor: require('plugins/mapster/mapster_params_editor.html')
     },
