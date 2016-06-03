@@ -32,7 +32,7 @@ module.directive("mapster", function (es, $timeout) {
     var HideUnlocated;
     var EnableExplosion;
     var ExplosionFile;
-    var ExplosionWidht;
+    var ExplosionWidth;
     var ExplosionHeight;
     var ExplosionDelay;
 
@@ -58,7 +58,7 @@ module.directive("mapster", function (es, $timeout) {
       EnableExplosion = $scope.vis.params.EnableExplosion;
       ExplosionFile = $scope.vis.params.ExplosionFile;
       ExplosionHeight = parseInt($scope.vis.params.ExplosionHeight);
-      ExplosionWidht = parseInt($scope.vis.params.ExplosionWidht);
+      ExplosionWidth = parseInt($scope.vis.params.ExplosionWidth);
       ExplosionDelay = parseInt($scope.vis.params.ExplosionDelay);
     }
 
@@ -310,9 +310,9 @@ module.directive("mapster", function (es, $timeout) {
             var explosion = svg.append("svg:image")
               .attr("class", "explosion")
               .attr("xlink:href", "/plugins/mapster/img/" + ExplosionFile + "?" + Date.now()) // ?param is a little trick to force gif to reload
-              .attr("width", ExplosionWidht)
+              .attr("width", ExplosionWidth)
               .attr("height", ExplosionHeight)
-              .attr("x", projection(coords)[0]-ExplosionWidht/2)
+              .attr("x", projection(coords)[0]-ExplosionWidth/2)
               .attr("y", projection(coords)[1]-ExplosionHeight);
             removeExplosion(explosion, ExplosionDelay);
           }
