@@ -206,22 +206,26 @@ module.directive('mapster', function (es, $timeout) {
 
           // Animate the route
           var max_length = route.node().getTotalLength();
-          var length = max_length*0.1;
           route.transition()
             .duration(duration)
-            .ease("linear")
-            .attr("stroke-dasharray", length + ", " + max_length)
-            .attrTween("stroke-dashoffset", function() {
+            .attrTween("stroke-dasharray", function() {
+              var i = d3.interpolateString("0," + max_length, max_length + "," + max_length);
               return function(t) {
-                return length - t*max_length;
+                return i(t);
               }
             })
             .transition()
-              .duration(duration*0.1)
+              .duration(duration*0.4)
               .ease("linear")
+              .attrTween("stroke-dasharray", function() {
+                var i = d3.interpolateString(max_length + "," + max_length, "0," + max_length);
+                return function(t) {
+                  return i(t);
+                }
+              })
               .attrTween("stroke-dashoffset", function() {
                 return function(t) {
-                  return length - max_length - t*length;
+                  return (1-t)*max_length - max_length;
                 }
               })
             .remove();
@@ -229,7 +233,6 @@ module.directive('mapster', function (es, $timeout) {
           // Animate the object
           container.transition()
             .duration(duration)
-            .ease("linear")
             .attrTween("transform", delta(route.node(), object_scale))
             .remove();
 
