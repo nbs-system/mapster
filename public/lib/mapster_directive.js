@@ -76,8 +76,8 @@ module.directive("mapster", function (es, $timeout) {
           var r = ObjectRotation - Math.atan2(-y, x) * 180 / Math.PI;
 
           return "translate(" + p.x + "," + p.y + ") scale(" + scale + ") rotate(" + r + ")";
-        }
-      }
+        };
+      };
 
     }
 
@@ -356,7 +356,7 @@ module.directive("mapster", function (es, $timeout) {
         }
 
         /* Recount events with same timestamp */
-        if (count == 0) {
+        if (count === 0) {
           for (var j = i; j < list.length - 1; j++) {
             if (new Date(list[j]["timestamp"]) > LastDate) {
               break;
@@ -369,13 +369,13 @@ module.directive("mapster", function (es, $timeout) {
         var diff = date - RefDate;
         diff = diff + 1000 / count * index;
 
-        if (list[i]["sensor"] == $scope.vis.params.special_effects) {
+        if (list[i]["sensor"] === $scope.vis.params.special_effects) {
           showSpecialEvent(list[i], diff);
         } else {
           /* Should we display unlocated events ? */
           if (HideUnlocated) {
             var coords = list[i]["coords"];
-            var unlocated = (coords.lat | 0) == 0 && (coords.lon | 0) == 0;
+            var unlocated = (coords.lat | 0) === 0 && (coords.lon | 0) === 0;
             if (!unlocated) {
               showEvent(list[i], diff);
             }
