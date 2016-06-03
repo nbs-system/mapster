@@ -13,11 +13,11 @@ module.directive("mapster", function (es, $timeout) {
   function link($scope, $element) {
     /* Shared variables */
     var svg, projection, path;
-    var origin_death = [];
-    var object_box = null;
-    var special_box = null;
+    var OriginDeath = [];
+    var ObjectBox = null;
+    var SpecialBox = null;
 
-    /* Constants TODO Use `const` instead of `var` but what happens when load_config is called ? */
+    /* Constants TODO Use `const` instead of `var` but what happens when loadConfig is called ? */
     var coords;
     var OriginDefaultSize;
     var OriginMaximumSize;
@@ -42,7 +42,7 @@ module.directive("mapster", function (es, $timeout) {
     }
 
     /* (re)load the configuration */
-    function load_config() {
+    function loadConfig() {
       coords = $scope.vis.params.TargetCoords.replace(/ /g, "").split(",");
       OriginDefaultSize = parseInt($scope.vis.params.OriginDefaultSize);
       OriginMaximumSize = parseInt($scope.vis.params.OriginMaximumSize);
@@ -82,42 +82,42 @@ module.directive("mapster", function (es, $timeout) {
     }
 
     /* Set a timeout to remove an origin */
-    function remove_origin(origin, time, delay) {
+    function removeOrigin(origin, time, delay) {
       return $timeout(function () {
         origin.transition()
           .ease("linear")
           .attr("r", 0)
           .duration(time)
           .each("end", function () {
-            // Remove IPs from origin_death array (free memory)
-            var class_ip = origin[0][0].classList[1];
-            delete origin_death[class_ip];
+            // Remove IPs from OriginDeath array (free memory)
+            var ClassIp = origin[0][0].classList[1];
+            delete OriginDeath[ClassIp];
           })
           .remove();
       }, delay);
     }
 
-    function remove_explosion(explosion, delay) {
+    function removeExplosion(explosion, delay) {
       $timeout(function() {
         explosion.remove();
       }, delay);
     }
 
     /* Set a timeout to display a specific event */
-    function show_event(event, diff) {
+    function showEvent(event, diff) {
       $timeout(function () {
         var coords = getCoords([event["coords"].lat, event["coords"].lon]);
 
         var color = $scope.colors[event["sensor"]].color;
 
-        var class_ip = "ip-" + event["peer_ip"].replace(/\./g, "_");
-        var origin = d3.select("." + class_ip);
+        var ClassIp = "ip-" + event["peer_ip"].replace(/\./g, "_");
+        var origin = d3.select("." + ClassIp);
         var size;
 
         if (origin[0][0]) {
           // Already exists, stop dying !
-          $timeout.cancel(origin_death[class_ip]);
-          delete origin_death[class_ip];
+          $timeout.cancel(OriginDeath[ClassIp]);
+          delete OriginDeath[ClassIp];
 
           // Make it bigger now :)
           size = parseInt(origin.attr("r"));
@@ -136,7 +136,7 @@ module.directive("mapster", function (es, $timeout) {
             .attr("r", OriginDefaultSize)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
-            .attr("class", "origin " + class_ip)
+            .attr("class", "origin " + ClassIp)
             .style("fill", color)
             .style("stroke", "#333")
             .style("stroke-width", 1);
@@ -148,7 +148,7 @@ module.directive("mapster", function (es, $timeout) {
           .attr("r", OriginDefaultSize)
           .attr("cx", projection(coords)[0])
           .attr("cy", projection(coords)[1])
-          .attr("class", "halo " + class_ip);
+          .attr("class", "halo " + ClassIp);
 
         // Make the halo grow and disappear
         halo.transition()
@@ -167,18 +167,18 @@ module.directive("mapster", function (es, $timeout) {
 
         // Make the origin die slowly
         var time = OriginDyingTime * size / OriginDefaultSize * 1000;
-        origin_death[class_ip] = remove_origin(origin, time, 0);
+        OriginDeath[ClassIp] = removeOrigin(origin, time, 0);
 
         // Draw the path and the object
-        if (object_box != null) {
+        if (ObjectBox != null) {
           var route = svg.append("path")
             .datum({type: "LineString", coordinates: [coords, TargetCoords]})
             .style("stroke", color)
             .attr("class", "route")
             .attr("d", path);
 
-          var width = object_box.width / -2; //TODO Wtf scale is not needed here but below yes
-          var height = object_box.height / -2;
+          var width = ObjectBox.width / -2; //TODO Wtf scale is not needed here but below yes
+          var height = ObjectBox.height / -2;
 
           // Container is used to move origin to the center of the object
           var container = svg.append("g");
@@ -192,11 +192,11 @@ module.directive("mapster", function (es, $timeout) {
           var duration = 2000;
 
           // Animate the route
-          var max_length = route.node().getTotalLength();
+          var MaxLength = route.node().getTotalLength();
           route.transition()
             .duration(duration)
             .attrTween("stroke-dasharray", function() {
-              var i = d3.interpolateString("0," + max_length, max_length + "," + max_length);
+              var i = d3.interpolateString("0," + MaxLength, MaxLength + "," + MaxLength);
               return function(t) {
                 return i(t);
               }
@@ -205,14 +205,14 @@ module.directive("mapster", function (es, $timeout) {
               .duration(duration*0.4)
               .ease("linear")
               .attrTween("stroke-dasharray", function() {
-                var i = d3.interpolateString(max_length + "," + max_length, "0," + max_length);
+                var i = d3.interpolateString(MaxLength + "," + MaxLength, "0," + MaxLength);
                 return function(t) {
                   return i(t);
                 }
               })
               .attrTween("stroke-dashoffset", function() {
                 return function(t) {
-                  return (1-t)*max_length - max_length;
+                  return (1-t)*MaxLength - MaxLength;
                 }
               })
             .remove();
@@ -227,19 +227,19 @@ module.directive("mapster", function (es, $timeout) {
       }, diff);
     }
 
-    function show_special_event(event, diff) {
+    function showSpecialEvent(event, diff) {
       $timeout(function () {
         var coords = getCoords([event["coords"].lat, event["coords"].lon]);
 
         // Draw the path and the object
-        if (object_box != null) {
+        if (ObjectBox != null) {
           var route = svg.append("path")
             .datum({type: "LineString", coordinates: [TargetCoords, coords]})
             .attr("class", "route")
             .attr("d", path);
 
-          var width = object_box.width / -2; //TODO Wtf scale is not needed here but below yes
-          var height = object_box.height / -2;
+          var width = ObjectBox.width / -2; //TODO Wtf scale is not needed here but below yes
+          var height = ObjectBox.height / -2;
 
           // Container is used to move origin to the center of the object
           var container = svg.append("g");
@@ -251,22 +251,22 @@ module.directive("mapster", function (es, $timeout) {
             .attr("d", ObjectShape);
 
           // Animate the object
-          var path_duration = 4000;
+          var PathDuration = 4000;
           container.transition()
             .ease("linear")
-            .duration(path_duration)
+            .duration(PathDuration)
             .attrTween("transform", delta(route.node(), ObjectScale * 2))
             .remove();
 
         }
 
         var color = $scope.colors[event["sensor"]].color;
-        var class_ip = "ban_ip-" + event["peer_ip"].replace(/\./g, "_");
+        var ClassIp = "ban_ip-" + event["peer_ip"].replace(/\./g, "_");
 
         $timeout(function () {
           // Create origin cross
-          var width = SpecialShapeScale * special_box.width / -2;
-          var height = SpecialShapeScale * special_box.height / -2;
+          var width = SpecialShapeScale * SpecialBox.width / -2;
+          var height = SpecialShapeScale * SpecialBox.height / -2;
 
           // Container is used to move origin to the center of the object
           var container = svg.append("g");
@@ -285,7 +285,7 @@ module.directive("mapster", function (es, $timeout) {
             .style("stroke-width", 2)
             .attr("cx", projection(coords)[0])
             .attr("cy", projection(coords)[1])
-            .attr("class", "halo " + class_ip);
+            .attr("class", "halo " + ClassIp);
 
           // Make the halo grow and disappear
           halo.transition()
@@ -303,7 +303,7 @@ module.directive("mapster", function (es, $timeout) {
             });
 
           // Tell it to die in the future
-          origin_death[class_ip] = remove_origin(origin, 5000, SpecialShapeRemaining);
+          OriginDeath[ClassIp] = removeOrigin(origin, 5000, SpecialShapeRemaining);
 
           // Create explosion
           if (EnableExplosion) {
@@ -314,21 +314,21 @@ module.directive("mapster", function (es, $timeout) {
               .attr("height", ExplosionHeight)
               .attr("x", projection(coords)[0]-ExplosionWidht/2)
               .attr("y", projection(coords)[1]-ExplosionHeight);
-            remove_explosion(explosion, ExplosionDelay);
+            removeExplosion(explosion, ExplosionDelay);
           }
 
           // Remove route
           route.remove();
-        }, path_duration);
+        }, PathDuration);
 
       }, diff);
     }
 
 
     /* Render events in the data scope */
-    function render_events() {
+    function renderEvents() {
       var list = $scope.data;
-      if (list == undefined) {
+      if (list == null) {
         return;
       }
 
@@ -341,8 +341,8 @@ module.directive("mapster", function (es, $timeout) {
       console.log("Window time size:", wsize);
       /* Tmp */
 
-      var ref_date = new Date(list[0]["timestamp"]);
-      var last_date = ref_date;
+      var RefDate = new Date(list[0]["timestamp"]);
+      var LastDate = RefDate;
       var count = 0;
       var index = 0;
 
@@ -350,15 +350,15 @@ module.directive("mapster", function (es, $timeout) {
         var date = new Date(list[i]["timestamp"]);
 
         /* Count should be at 0 when the condition is triggered */
-        if (date > last_date) {
-          last_date = date;
+        if (date > LastDate) {
+          LastDate = date;
           index = 0;
         }
 
         /* Recount events with same timestamp */
         if (count == 0) {
           for (var j = i; j < list.length - 1; j++) {
-            if (new Date(list[j]["timestamp"]) > last_date) {
+            if (new Date(list[j]["timestamp"]) > LastDate) {
               break;
             }
             count++;
@@ -366,21 +366,21 @@ module.directive("mapster", function (es, $timeout) {
         }
 
         /* Make events with same timestamp appear smoothly/distributively on 1 second */
-        var diff = date - ref_date;
+        var diff = date - RefDate;
         diff = diff + 1000 / count * index;
 
         if (list[i]["sensor"] == $scope.vis.params.special_effects) {
-          show_special_event(list[i], diff);
+          showSpecialEvent(list[i], diff);
         } else {
           /* Should we display unlocated events ? */
           if (HideUnlocated) {
             var coords = list[i]["coords"];
             var unlocated = (coords.lat | 0) == 0 && (coords.lon | 0) == 0;
             if (!unlocated) {
-              show_event(list[i], diff);
+              showEvent(list[i], diff);
             }
           } else {
-            show_event(list[i], diff);
+            showEvent(list[i], diff);
           }
         }
         index++;
@@ -388,8 +388,8 @@ module.directive("mapster", function (es, $timeout) {
     }
 
     /* Render the map */
-    function render_map() {
-      load_config();
+    function renderMap() {
+      loadConfig();
       $element.css({
         height: $element.parent().height(),
         width: "100%"
@@ -420,13 +420,13 @@ module.directive("mapster", function (es, $timeout) {
       var object = svg.append("path")
         .attr("transform", "scale(" + ObjectScale + ")")
         .attr("d", ObjectShape);
-      object_box = object.node().getBBox();
+      ObjectBox = object.node().getBBox();
       object.remove();
 
       // Draw a sample special object to get its size
       var special = svg.append("path")
         .attr("d", SpecialShape);
-      special_box = special.node().getBBox();
+      SpecialBox = special.node().getBBox();
       special.remove();
 
       // Draw d3 map
@@ -450,14 +450,14 @@ module.directive("mapster", function (es, $timeout) {
 
     /* Render events each time kibana fetches new data */
     $scope.$watch("data", function () {
-      render_events();
+      renderEvents();
     });
 
     /* Redraw everything when options are modified */
-    $scope.$watch("vis.params", load_config);
+    $scope.$watch("vis.params", loadConfig);
 
     // First map render is a bit postponed otherwise it does not work
-    $timeout(render_map, 100);
+    $timeout(renderMap, 100);
 
   }
 
