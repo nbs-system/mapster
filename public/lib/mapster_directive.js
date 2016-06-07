@@ -26,6 +26,7 @@ module.directive("mapster", function (es, $timeout) {
     var ObjectShape;
     var ObjectScale;
     var ObjectRotation;
+    var SpecialEffects;
     var SpecialShape;
     var SpecialShapeScale;
     var SpecialShapeRemaining;
@@ -51,6 +52,7 @@ module.directive("mapster", function (es, $timeout) {
       ObjectShape = $scope.vis.params.ObjectShape;
       ObjectScale = parseFloat($scope.vis.params.ObjectScale);
       ObjectRotation = parseInt($scope.vis.params.ObjectRotation);
+      SpecialEffects = $scope.vis.params.SpecialEffects;
       SpecialShape = $scope.vis.params.SpecialShape;
       SpecialShapeScale = parseFloat($scope.vis.params.SpecialShapeScale);
       SpecialShapeRemaining = parseInt($scope.vis.params.SpecialShapeRemaining);
@@ -369,7 +371,7 @@ module.directive("mapster", function (es, $timeout) {
         var diff = date - RefDate;
         diff = diff + 1000 / count * index;
 
-        if (list[i]["sensor"] === $scope.vis.params.special_effects) {
+        if ($.inArray(list[i]["sensor"], SpecialEffects) > -1) {
           showSpecialEvent(list[i], diff);
         } else {
           /* Should we display unlocated events ? */
