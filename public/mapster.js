@@ -26,7 +26,7 @@ function mapsterProvider(Private) {
         OriginDefaultSize: 4,
         OriginMaximumSize: 14,
         OriginDyingTime: 10,
-        HideUnlocated: false,
+        HideUnlocated: true,
         EnableExplosion: true,
         ExplosionFile: "explosion.gif",
         ExplosionHeight: 60,
