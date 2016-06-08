@@ -174,7 +174,7 @@ module.directive("mapster", function (es, $timeout) {
         OriginDeath[ClassIp] = removeOrigin(origin, time, 0);
 
         // Draw the path and the object
-        if (ObjectBox != null) {
+        if (ObjectBox !== null) {
           var route = svg.append("path")
             .datum({type: "LineString", coordinates: [coords, TargetCoords]})
             .style("stroke", color)
@@ -203,7 +203,7 @@ module.directive("mapster", function (es, $timeout) {
               var i = d3.interpolateString("0," + MaxLength, MaxLength + "," + MaxLength);
               return function(t) {
                 return i(t);
-              }
+              };
             })
             .transition()
               .duration(duration*0.4)
@@ -212,12 +212,12 @@ module.directive("mapster", function (es, $timeout) {
                 var i = d3.interpolateString(MaxLength + "," + MaxLength, "0," + MaxLength);
                 return function(t) {
                   return i(t);
-                }
+                };
               })
               .attrTween("stroke-dashoffset", function() {
                 return function(t) {
                   return (1-t)*MaxLength - MaxLength;
-                }
+                };
               })
             .remove();
 
@@ -236,7 +236,7 @@ module.directive("mapster", function (es, $timeout) {
         var coords = getCoords([event["coords"].lat, event["coords"].lon]);
 
         // Draw the path and the object
-        if (ObjectBox != null) {
+        if (ObjectBox !== null) {
           var route = svg.append("path")
             .datum({type: "LineString", coordinates: [TargetCoords, coords]})
             .attr("stroke", "red")
@@ -333,7 +333,7 @@ module.directive("mapster", function (es, $timeout) {
     /* Render events in the data scope */
     function renderEvents() {
       var list = $scope.data;
-      if (list == null) {
+      if (list === null) {
         return;
       }
 

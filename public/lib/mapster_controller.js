@@ -20,9 +20,9 @@ module.controller('MapsterController', function ($scope, Private) {
         asAggConfigResults: true
       });
 
-      var table = table.tables[0];
+      table = table.tables[0];
 
-      if (table == undefined) {
+      if (table === undefined) {
         $scope.data = null;
         return;
       }
@@ -33,7 +33,7 @@ module.controller('MapsterController', function ($scope, Private) {
       var sensorAggId = $scope.vis.aggs.bySchemaName['sensor'][0].id;
       var sensorColumn = 0;
       for (var i = 0; i < table.columns.length; i++) {
-        if (table.columns[i].aggConfig.id == sensorAggId) {
+        if (table.columns[i].aggConfig.id === sensorAggId) {
           sensorColumn = i;
           break;
         }
@@ -42,7 +42,7 @@ module.controller('MapsterController', function ($scope, Private) {
       $scope.data = table.rows.map(function(row) {
         var sensor = row[sensorColumn].key;
         // Fill the colors array
-        if (colors[sensor] == undefined) {
+        if (colors[sensor] === undefined) {
           colors[sensor] = 0;
         } else {
           colors[sensor] += 1;
