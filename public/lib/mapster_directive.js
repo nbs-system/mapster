@@ -18,24 +18,24 @@ module.directive("mapster", function (es, $timeout) {
     var SpecialBox = null;
 
     /* Constants TODO Use `const` instead of `var` but what happens when loadConfig is called ? */
-    var coords;
-    var OriginDefaultSize;
-    var OriginMaximumSize;
-    var OriginDyingTime;
-    var TargetCoords;
-    var ObjectShape;
-    var ObjectScale;
-    var ObjectRotation;
-    var SpecialEffects;
-    var SpecialShape;
-    var SpecialShapeScale;
-    var SpecialShapeRemaining;
-    var HideUnlocated;
-    var EnableExplosion;
-    var ExplosionFile;
-    var ExplosionWidth;
-    var ExplosionHeight;
-    var ExplosionDelay;
+    var OriginDefaultSize;      // Origin default size
+    var OriginMaximumSize;      // Origin maximum size
+    var OriginDyingTime;        // Origin dying time
+    var TargetCoords;           // Coordinates to the target
+    var ObjectShape;            // Object svg shape
+    var ObjectScale;            // Objects scale
+    var ObjectRotation;         // Object rotation (90°, ...)
+    var SpecialEffects;         // List of events marked as special
+    var SpecialEffectsScale;    // Big missile scale
+    var SpecialShape;           // Additionnal shape svg
+    var SpecialShapeScale;      // Additionnal shape scale
+    var SpecialShapeRemaining;  // Additionnal shape remaining time
+    var HideUnlocated;          // Hide events at 0,0
+    var EnableExplosion;        // Enable explosions
+    var ExplosionFile;          // Explosions gif path
+    var ExplosionWidth;         // Explosions width
+    var ExplosionHeight;        // Explosions height
+    var ExplosionDelay;         // Explosions remaining time
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
     function getCoords(coords) {
@@ -44,15 +44,16 @@ module.directive("mapster", function (es, $timeout) {
 
     /* (re)load the configuration */
     function loadConfig() {
-      coords = $scope.vis.params.TargetCoords.replace(/ /g, "").split(",");
       OriginDefaultSize = parseInt($scope.vis.params.OriginDefaultSize);
       OriginMaximumSize = parseInt($scope.vis.params.OriginMaximumSize);
       OriginDyingTime = parseInt($scope.vis.params.OriginDyingTime);
+      var coords = $scope.vis.params.TargetCoords.replace(/ /g, "").split(",");
       TargetCoords = getCoords([parseInt(coords[0]), parseInt(coords[1])]);
       ObjectShape = $scope.vis.params.ObjectShape;
       ObjectScale = parseFloat($scope.vis.params.ObjectScale);
       ObjectRotation = parseInt($scope.vis.params.ObjectRotation);
       SpecialEffects = $scope.vis.params.SpecialEffects;
+      SpecialEffectsScale = parseFloat($scope.vis.params.SpecialEffectsScale);
       SpecialShape = $scope.vis.params.SpecialShape;
       SpecialShapeScale = parseFloat($scope.vis.params.SpecialShapeScale);
       SpecialShapeRemaining = parseInt($scope.vis.params.SpecialShapeRemaining);
@@ -66,6 +67,7 @@ module.directive("mapster", function (es, $timeout) {
 
     /* Transform the object rotation/position etc. */
     function delta(node, scale) {
+      // TODO Remove scale parameter
       var l = node.getTotalLength();
       return function (i) {
         return function (t) {
@@ -179,8 +181,8 @@ module.directive("mapster", function (es, $timeout) {
             .attr("class", "route")
             .attr("d", path);
 
-          var width = ObjectBox.width / -2; //TODO Wtf scale is not needed here but below yes
-          var height = ObjectBox.height / -2;
+          var width = ObjectScale * ObjectBox.width / -2; //TODO Wtf scale is not needed here but below yes
+          var height = ObjectScale * ObjectBox.height / -2;
 
           // Container is used to move origin to the center of the object
           var container = svg.append("g");
@@ -188,7 +190,7 @@ module.directive("mapster", function (es, $timeout) {
             .style("fill", color)
             .style("stroke", "black")
             .style("stroke-width", 1)
-            .attr("transform", "translate(" + width + "," + height + ")")
+            .attr("transform", "translate(" + width + "," + height + ") scale(" + ObjectScale + ")")
             .attr("d", ObjectShape);
 
           var duration = 2000;
@@ -222,7 +224,7 @@ module.directive("mapster", function (es, $timeout) {
           // Animate the object
           container.transition()
             .duration(duration)
-            .attrTween("transform", delta(route.node(), ObjectScale))
+            .attrTween("transform", delta(route.node(), 1))
             .remove();
 
         }
@@ -237,11 +239,12 @@ module.directive("mapster", function (es, $timeout) {
         if (ObjectBox != null) {
           var route = svg.append("path")
             .datum({type: "LineString", coordinates: [TargetCoords, coords]})
+            .attr("stroke", "red")
             .attr("class", "route")
             .attr("d", path);
 
-          var width = ObjectBox.width / -2; //TODO Wtf scale is not needed here but below yes
-          var height = ObjectBox.height / -2;
+          var width = SpecialEffectsScale * ObjectBox.width/ -2;
+          var height = SpecialEffectsScale * ObjectBox.height/-2;
 
           // Container is used to move origin to the center of the object
           var container = svg.append("g");
@@ -249,7 +252,7 @@ module.directive("mapster", function (es, $timeout) {
             .style("fill", "orange")
             .style("stroke", "black")
             .style("stroke-width", 1)
-            .attr("transform", "translate(" + width + "," + height + ")")
+            .attr("transform", "translate(" + width + "," + height + ") scale(" + SpecialEffectsScale + ")")
             .attr("d", ObjectShape);
 
           // Animate the object
@@ -257,7 +260,7 @@ module.directive("mapster", function (es, $timeout) {
           container.transition()
             .ease("linear")
             .duration(PathDuration)
-            .attrTween("transform", delta(route.node(), ObjectScale * 2))
+            .attrTween("transform", delta(route.node(), 1))
             .remove();
 
         }
@@ -420,7 +423,6 @@ module.directive("mapster", function (es, $timeout) {
 
       // Draw a sample object to get its size
       var object = svg.append("path")
-        .attr("transform", "scale(" + ObjectScale + ")")
         .attr("d", ObjectShape);
       ObjectBox = object.node().getBBox();
       object.remove();
