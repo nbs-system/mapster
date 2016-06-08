@@ -67,7 +67,7 @@ module.controller('MapsterController', function ($scope, Private) {
       sorted.sort(function(a, b) { return b[1] - a[1]; });
 
       // Attribute colors
-      for (var i = 0; i < sorted.length; i++) {
+      for (i = 0; i < sorted.length; i++) {
         colors[sorted[i][0]] = {name: sorted[i][0], color: palette[i]};
       }
       $scope.colors = colors;
