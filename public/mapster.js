@@ -32,7 +32,8 @@ function mapsterProvider(Private) {
         ExplosionFile: "explosion.gif",
         ExplosionHeight: 60,
         ExplosionWidth: 60,
-        ExplosionDelay: 2700
+        ExplosionDelay: 2700,
+        maximumEvents: 10
       },
       editor: require('plugins/mapster/mapster_params_editor.html')
     },

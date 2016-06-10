@@ -50,6 +50,7 @@ module.controller('MapsterController', function ($scope, Private) {
 
         // Return data rows
         // TODO The rows order might not be respected, check sensor column above
+        // TODO Add extra information from extra buckets
         return {
           timestamp: row[0].key,
           coords: geohash.decode(row[1].key),

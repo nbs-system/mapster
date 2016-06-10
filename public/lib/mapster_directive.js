@@ -1,7 +1,9 @@
+"use strict";
+
 var _ = require("lodash");
 var $ = require("jquery");
 var numeral = require("numeral");
-var dateformat = require("plugins/mapster/lib/dateformat.js");
+var moment = require("moment");
 var d3 = require("d3");
 
 var topojson = require("plugins/mapster/lib/topojson.min.js");
@@ -12,12 +14,12 @@ module.directive("mapster", function (es, $timeout) {
 
   function link($scope, $element) {
     /* Shared variables */
-    var svg, projection, path;
+    var svg, projection, path, logs;
     var OriginDeath = [];
     var ObjectBox = null;
     var SpecialBox = null;
 
-    /* Constants TODO Use `const` instead of `var` but what happens when loadConfig is called ? */
+    /* Configuration variables */
     var OriginDefaultSize;      // Origin default size
     var OriginMaximumSize;      // Origin maximum size
     var OriginDyingTime;        // Origin dying time
@@ -36,6 +38,7 @@ module.directive("mapster", function (es, $timeout) {
     var ExplosionWidth;         // Explosions width
     var ExplosionHeight;        // Explosions height
     var ExplosionDelay;         // Explosions remaining time
+    var maximumEvents;          // Maximum events in the log table
 
     /* Revert lat/lon to lon/lat (math view vs world view) */
     function getCoords(coords) {
@@ -63,11 +66,11 @@ module.directive("mapster", function (es, $timeout) {
       ExplosionHeight = parseInt($scope.vis.params.ExplosionHeight);
       ExplosionWidth = parseInt($scope.vis.params.ExplosionWidth);
       ExplosionDelay = parseInt($scope.vis.params.ExplosionDelay);
+      maximumEvents = parseInt($scope.vis.params.maximumEvents);
     }
 
     /* Transform the object rotation/position etc. */
-    function delta(node, scale) {
-      // TODO Remove scale parameter
+    function delta(node) {
       var l = node.getTotalLength();
       return function (i) {
         return function (t) {
@@ -79,7 +82,7 @@ module.directive("mapster", function (es, $timeout) {
           var y = p2.y - p.y;
           var r = ObjectRotation - Math.atan2(-y, x) * 180 / Math.PI;
 
-          return "translate(" + p.x + "," + p.y + ") scale(" + scale + ") rotate(" + r + ")";
+          return "translate(" + p.x + "," + p.y + ") rotate(" + r + ")";
         };
       };
 
@@ -110,11 +113,11 @@ module.directive("mapster", function (es, $timeout) {
     /* Set a timeout to display a specific event */
     function showEvent(event, diff) {
       $timeout(function () {
-        var coords = getCoords([event["coords"].lat, event["coords"].lon]);
+        var coords = getCoords([event.coords.lat, event.coords.lon]);
 
-        var color = $scope.colors[event["sensor"]].color;
+        var color = $scope.colors[event.sensor].color;
 
-        var ClassIp = "ip-" + event["peer_ip"].replace(/\./g, "_");
+        var ClassIp = "ip-" + event.peer_ip.replace(/\./g, "_");
         var origin = d3.select("." + ClassIp);
         var size;
 
@@ -224,7 +227,7 @@ module.directive("mapster", function (es, $timeout) {
           // Animate the object
           container.transition()
             .duration(duration)
-            .attrTween("transform", delta(route.node(), 1))
+            .attrTween("transform", delta(route.node()))
             .remove();
 
         }
@@ -233,7 +236,7 @@ module.directive("mapster", function (es, $timeout) {
 
     function showSpecialEvent(event, diff) {
       $timeout(function () {
-        var coords = getCoords([event["coords"].lat, event["coords"].lon]);
+        var coords = getCoords([event.coords.lat, event.coords.lon]);
 
         // Draw the path and the object
         if (ObjectBox !== null) {
@@ -260,13 +263,13 @@ module.directive("mapster", function (es, $timeout) {
           container.transition()
             .ease("linear")
             .duration(PathDuration)
-            .attrTween("transform", delta(route.node(), 1))
+            .attrTween("transform", delta(route.node()))
             .remove();
 
         }
 
-        var color = $scope.colors[event["sensor"]].color;
-        var ClassIp = "ban_ip-" + event["peer_ip"].replace(/\./g, "_");
+        var color = $scope.colors[event.sensor].color;
+        var ClassIp = "ban_ip-" + event.peer_ip.replace(/\./g, "_");
 
         $timeout(function () {
           // Create origin cross
@@ -329,6 +332,22 @@ module.directive("mapster", function (es, $timeout) {
       }, diff);
     }
 
+    /* Show the event in the log list */
+    function showEventLog(event, diff) {
+      $timeout(function() {
+        // Create new row
+        var tr = logs.append("tr");
+        tr.html("<td>" + moment(event.timestamp).format('YYYY-MM-DD HH:mm:ss') + "</td><td>" + event.coords.lat + ","
+          + event.coords.lon + "</td><td>" + event.peer_ip + "</td><td style=\"color: " + $scope.colors[event.sensor].color + "\">" + event.sensor + "</td>");
+
+        // Remove extra elements
+        var l = logs[0][0];
+        if (l.children.length >= maximumEvents) {
+          l.deleteRow(0);
+        }
+      }, diff);
+    }
+
 
     /* Render events in the data scope */
     function renderEvents() {
@@ -376,6 +395,7 @@ module.directive("mapster", function (es, $timeout) {
 
         if ($.inArray(list[i]["sensor"], SpecialEffects) > -1) {
           showSpecialEvent(list[i], diff);
+          showEventLog(list[i], diff);
         } else {
           /* Should we display unlocated events ? */
           if (HideUnlocated) {
@@ -383,9 +403,11 @@ module.directive("mapster", function (es, $timeout) {
             var unlocated = (coords.lat | 0) === 0 && (coords.lon | 0) === 0;
             if (!unlocated) {
               showEvent(list[i], diff);
+              showEventLog(list[i], diff);
             }
           } else {
             showEvent(list[i], diff);
+            showEventLog(list[i], diff);
           }
         }
         index++;
@@ -444,8 +466,12 @@ module.directive("mapster", function (es, $timeout) {
           .attr("class", "country")
           .attr("d", path);
       });
+
+      // Get log table
+      logs = d3.select("#logs");
     }
 
+    /** Main **/
     $scope.open = $scope.open || true;
 
     $scope.toggleLegend = function () {
