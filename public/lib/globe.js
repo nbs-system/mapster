@@ -62,6 +62,9 @@ var Globe = function () {
   var rotation = {x: 0, y: 0};
   var overRenderer;
 
+  var textureLoader;
+  var origins = {};
+
   var distance = 100000;
   var distanceTarget = 100000;
 
@@ -112,7 +115,7 @@ var Globe = function () {
   function addSphere() {
     // Add sphere
     var geometry = new THREE.SphereGeometry(sphereRadius, 40, 30);
-    var textureLoader = new THREE.TextureLoader();
+    textureLoader = new THREE.TextureLoader();
 
     var uniforms = THREE.UniformsUtils.clone(Shaders['earth'].uniforms);
     uniforms['texture'].value = textureLoader.load('/plugins/mapster/img/world.jpg');
@@ -220,6 +223,34 @@ var Globe = function () {
       }
 
       var spline = new THREE.CatmullRomCurve3(points);
+      var _class = "" + lat1 + lon1 + lat2 + lon2;
+
+      if (origins[_class]) {
+        // Make it bigger now :)
+        var size = origins[_class].material.size;
+        if (size < config.OriginDefaultSize / 2) {
+          size = config.OriginDefaultSize;
+        } else if (size > config.OriginMaximumSize) {
+          size = config.OriginMaximumSize;
+        } else {
+          size += config.OriginDefaultSize;
+        }
+        origins[_class].material.size = size;
+      } else {
+        var originGeometry = new THREE.Geometry();
+        originGeometry.vertices.push(points[0]);
+        var originMaterial = new THREE.PointsMaterial({
+          color: color,
+          size: config.OriginDefaultSize*3,
+          map: textureLoader.load("/plugins/mapster/img/particle.png"),
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          transparent: true
+        });
+        var originMesh = new THREE.Points(originGeometry, originMaterial);
+        scene.add(originMesh);
+        origins[_class] = originMesh;
+      }
 
       /* Add alternate points */
       var num_coords = MAX_POINTS * 3;
@@ -392,6 +423,17 @@ var Globe = function () {
     }
   }
 
+  function animateOrigins() {
+    for (var o in origins) {
+      origins[o].material.size -= 0.08;
+      if (origins[o].material.size <= 0) {
+        // TODO Remove origins array use scene
+        scene.remove(origins[o]);
+        delete origins[o];
+      }
+    }
+  }
+
   function zoom(delta) {
     distanceTarget -= delta;
     distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
@@ -475,6 +517,7 @@ var Globe = function () {
     camera.lookAt(sphere.position);
 
     animateLines();
+    animateOrigins();
     renderer.render(scene, camera);
   }
 
