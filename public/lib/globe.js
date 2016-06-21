@@ -228,12 +228,12 @@ var Globe = function () {
       if (origins[_class]) {
         // Make it bigger now :)
         var size = origins[_class].material.size;
-        if (size < config.OriginDefaultSize / 2) {
+        if (size < config.OriginDefaultSize*2) {
           size = config.OriginDefaultSize;
-        } else if (size > config.OriginMaximumSize) {
-          size = config.OriginMaximumSize;
+        } else if (size > config.OriginMaximumSize*2) {
+          size = config.OriginMaximumSize*2;
         } else {
-          size += config.OriginDefaultSize;
+          size += config.OriginDefaultSize*4;
         }
         origins[_class].material.size = size;
       } else {
@@ -241,7 +241,7 @@ var Globe = function () {
         originGeometry.vertices.push(points[0]);
         var originMaterial = new THREE.PointsMaterial({
           color: color,
-          size: config.OriginDefaultSize*3,
+          size: config.OriginDefaultSize*4,
           map: textureLoader.load("/plugins/mapster/img/particle.png"),
           depthWrite: false,
           blending: THREE.AdditiveBlending,
@@ -425,7 +425,7 @@ var Globe = function () {
 
   function animateOrigins() {
     for (var o in origins) {
-      origins[o].material.size -= 0.08;
+      origins[o].material.size -= 0.05;
       if (origins[o].material.size <= 0) {
         // TODO Remove origins array use scene
         scene.remove(origins[o]);
