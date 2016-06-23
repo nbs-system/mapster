@@ -1,102 +1,12 @@
-<div class="form-group">
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Use a 3D Map ?</span>
-        <input type="checkbox" ng-model="vis.params.globe">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Object shape</span>
-        <input type="text" ng-model="vis.params.ObjectShape">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Object scale</span>
-        <input type="text" ng-model="vis.params.ObjectScale">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Object rotation</span>
-        <input type="text" ng-model="vis.params.ObjectRotation">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Target coords</span>
-        <input type="text" ng-model="vis.params.TargetCoords">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Special effects</span>
-        <input type="text" ng-model="vis.params.SpecialEffects">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Special effects scale</span>
-        <input type="text" ng-model="vis.params.SpecialEffectsScale">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Special shape</span>
-        <input type="text" ng-model="vis.params.SpecialShape">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Special scale</span>
-        <input type="text" ng-model="vis.params.SpecialShapeScale">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Special remaining time (seconds)</span>
-        <input type="text" ng-model="vis.params.SpecialShapeRemaining">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Origin default size</span>
-        <input type="text" ng-model="vis.params.OriginDefaultSize">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Origin maximum size</span>
-        <input type="text" ng-model="vis.params.OriginMaximumSize">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Origin dying time</span>
-        <input type="text" ng-model="vis.params.OriginDyingTime">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Hide events at (0,0)</span>
-        <input type="checkbox" ng-model="vis.params.HideUnlocated">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Enable explosions</span>
-        <input type="checkbox" ng-model="vis.params.EnableExplosion">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Explosion file</span>
-        <input type="text" ng-model="vis.params.ExplosionFile">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Explosion height</span>
-        <input type="text" ng-model="vis.params.ExplosionHeight">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Explosion width</span>
-        <input type="text" ng-model="vis.params.ExplosionWidth">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Explosion delay in ms (gif animation delay)</span>
-        <input type="text" ng-model="vis.params.ExplosionDelay">
-    </div>
-
-    <div class="vis-editor-agg-header">
-        <span class="vis-editor-agg-header-title">Number of events in the event logs</span>
-        <input type="text" ng-model="vis.params.maximumEvents">
+<div ng-controller="MapsterParamsEditor">
+    <div ng-repeat="param in params" class="vis-editor-agg-header">
+        <div class="mapster_edition">
+            <span class="vis-editor-agg-header-title">{{param.title}} <span class="fa fa-question-circle help_icon" ng-click="showhelp[param.param]=!showhelp[param.param]"></span></span>
+            <input type="{{param.type}}" ng-model="vis.params[param.param]">
+        </div>
+        <div class="mapster_helper" ng-show="showhelp[param.param]">
+            {{param.help}}
+        </div>
     </div>
 </div>
 
