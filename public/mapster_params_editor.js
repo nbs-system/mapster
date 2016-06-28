@@ -35,7 +35,7 @@ module.controller('MapsterParamsEditor', function MapsterParamsEditor($scope) {
     {
       param: 'TargetCoords',
       title: 'Target coordinates',
-      help: 'TODO',
+      help: 'If the above option is false (only one target) then the format is like so: [lat, lon]. Otherwise you have to specify multiple locations like this: {"loc1", [lat, lon], "loc2", [lat, lon]}',
       type: 'text'
     },
     {

@@ -383,20 +383,19 @@ var Globe = function () {
       var color = colors[list[i]["sensor"]].color;
       var coords = list[i]["coords"];
 
-      // D3 wtf TODO Let the targetCoords as it is in the config (fuck d3 reversed coords etc.)
       /* Should we display unlocated events ? */
       if ($.inArray(list[i]["sensor"], config.SpecialEffects) > -1) {
-        showSpecialEvent(config.TargetCoords[1], config.TargetCoords[0], coords.lat, coords.lon, sphereRadius, color, diff);
+        showSpecialEvent(config.TargetCoords[0], config.TargetCoords[1], coords.lat, coords.lon, sphereRadius, color, diff);
         showEventLog(list[i], color, diff);
       } else {
         if (config.HideUnlocated) {
           var unlocated = (coords.lat | 0) === 0 && (coords.lon | 0) === 0;
           if (!unlocated) {
-            showEvent(coords.lat, coords.lon, config.TargetCoords[1], config.TargetCoords[0], sphereRadius, color, diff);
+            showEvent(coords.lat, coords.lon, config.TargetCoords[0], config.TargetCoords[1], sphereRadius, color, diff);
             showEventLog(list[i], color, diff);
           }
         } else {
-          showEvent(coords.lat, coords.lon, config.TargetCoords[1], config.TargetCoords[0], sphereRadius, color, diff);
+          showEvent(coords.lat, coords.lon, config.TargetCoords[0], config.TargetCoords[1], sphereRadius, color, diff);
           showEventLog(list[i], color, diff);
         }
       }

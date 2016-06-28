@@ -128,9 +128,14 @@ var Map = function () {
       OriginDeath[ClassIp] = removeOrigin(origin, time, 0);
 
       // Draw the path and the object
+      if (config.multipleTargets) {
+        var targetCoords = getCoords([event.target.lat, event.target.lon]);
+      } else {
+        var targetCoords = getCoords(config.TargetCoords);
+      }
       if (ObjectBox !== null) {
         var route = svg.append("path")
-          .datum({type: "LineString", coordinates: [coords, config.TargetCoords]})
+          .datum({type: "LineString", coordinates: [coords, targetCoords]})
           .style("stroke", color)
           .attr("class", "route")
           .attr("d", path);
@@ -190,9 +195,14 @@ var Map = function () {
       var coords = getCoords([event.coords.lat, event.coords.lon]);
 
       // Draw the path and the object
+      if (config.multipleTargets) {
+        var targetCoords = getCoords([event.target.lat, event.target.lon]);
+      } else {
+        var targetCoords = getCoords(config.TargetCoords);
+      }
       if (ObjectBox !== null) {
         var route = svg.append("path")
-          .datum({type: "LineString", coordinates: [config.TargetCoords, coords]})
+          .datum({type: "LineString", coordinates: [targetCoords, coords]})
           .attr("class", "route")
           .attr("d", path);
 
@@ -338,6 +348,7 @@ var Map = function () {
       }
 
       /* Make events with same timestamp appear smoothly/distributively on 1 second */
+      // TODO Improve this (it pauses before switching to another second 
       var diff = date - RefDate;
       diff = diff + 1000 / count * index;
 

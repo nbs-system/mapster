@@ -37,6 +37,9 @@ last 30 seconds, enable auto-refresh and enjoy !
 # Configuration
 To add Mapster to a dashboard, first create a new [visualization](https://www.elastic.co/guide/en/kibana/current/visualize.html).
 
+## Important information
+Notice that when customizing the visualization some options are not automatically refreshed and you might need to do a manual refresh (F5).
+
 ## Choosing correct aggregations
 The metric should be set to `Count`.
 

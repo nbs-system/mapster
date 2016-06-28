@@ -6,15 +6,15 @@ module.directive("mapster", function (es, $timeout) {
 
     /* (re)load the configuration */
     function loadConfig() {
-      var coords = $scope.vis.params.TargetCoords.replace(/ /g, "").split(",");
       return {
         /* Global */
         "globe": $scope.vis.params.globe,
+        "multipleTargets": $scope.vis.params.multipleTargets,
+        "TargetCoords": JSON.parse($scope.vis.params.TargetCoords),
         /* Map */
         "OriginDefaultSize": parseInt($scope.vis.params.OriginDefaultSize),
         "OriginMaximumSize": parseInt($scope.vis.params.OriginMaximumSize),
         "OriginDyingTime": parseInt($scope.vis.params.OriginDyingTime),
-        "TargetCoords": [parseInt(coords[1]), parseInt(coords[0])], // Coords are reversed
         "ObjectShape": $scope.vis.params.ObjectShape,
         "ObjectScale": parseFloat($scope.vis.params.ObjectScale),
         "ObjectRotation": parseInt($scope.vis.params.ObjectRotation),

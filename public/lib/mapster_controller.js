@@ -14,6 +14,30 @@ module.controller('MapsterController', function ($scope, Private) {
       const vis = $scope.vis;
       const params = vis.params;
 
+      // Get the column numbers
+      try {
+        var timestampAggId = vis.aggs.bySchemaName['timestamp'][0].id;
+        var coordsAggId = vis.aggs.bySchemaName['coords'][0].id;
+        var peerIpAggId = vis.aggs.bySchemaName['peer_ip'][0].id;
+        var sensorAggId = vis.aggs.bySchemaName['sensor'][0].id;
+      } catch (err) {
+        console.error("One of the required agregations is not set.");
+      }
+
+      var targetAggId;
+      try {
+        targetAggId = vis.aggs.bySchemaName['target'][0].id;
+      } catch (err) {
+        console.log("Target location is not set.");
+      }
+
+      var timestampColumn = -1;
+      var coordsColumn = -1;
+      var peerIpColumn = -1;
+      var sensorColumn = -1;
+      var targetColumn = -1;
+
+      // Tabify response
       var table = tabifyAggResponse(vis, resp, {
         partialRows: params.showPatialRows,
         minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels,
@@ -21,23 +45,33 @@ module.controller('MapsterController', function ($scope, Private) {
       });
 
       table = table.tables[0];
-
       if (table === undefined) {
         $scope.data = null;
         return;
       }
 
-      var colors = {};
-
-      // Get the sensor column
-      var sensorAggId = $scope.vis.aggs.bySchemaName['sensor'][0].id;
-      var sensorColumn = 0;
       for (var i = 0; i < table.columns.length; i++) {
-        if (table.columns[i].aggConfig.id === sensorAggId) {
-          sensorColumn = i;
-          break;
+        var id = table.columns[i].aggConfig.id;
+        switch (id) {
+          case timestampAggId:
+            timestampColumn = i;
+            break;
+          case coordsAggId:
+            coordsColumn = i;
+            break;
+          case peerIpAggId:
+            peerIpColumn = i;
+            break;
+          case sensorAggId:
+            sensorColumn = i;
+            break;
+          case targetAggId:
+            targetColumn = i;
+            break;
         }
       }
+
+      var colors = {};
 
       $scope.data = table.rows.map(function(row) {
         var sensor = row[sensorColumn].key;
@@ -49,15 +83,19 @@ module.controller('MapsterController', function ($scope, Private) {
         }
 
         // Return data rows
-        // TODO The rows order might not be respected, check sensor column above
         // TODO Add extra information from extra buckets
-        return {
-          timestamp: row[0].key,
-          coords: geohash.decode(row[1].key),
-          peer_ip: row[2].key,
-          sensor: sensor, 
-          count: row[4].key
-        };
+        // FIXME Maybe extra buckets are useless actually.
+        var data = {};
+        data['timestamp'] = row[timestampColumn].key;
+        data['coords'] = geohash.decode(row[coordsColumn].key);
+        data['peer_ip'] = row[peerIpColumn].key;
+        data['sensor'] = sensor;
+        data['count'] = row[4].key;
+        if (targetColumn >= 0) {
+          data['target'] = geohash.decode(row[targetColumn].key);
+        }
+
+        return data;
       });
 
       // We sort it so the most used sensors have always the same color
