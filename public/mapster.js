@@ -5,8 +5,8 @@ require('plugins/mapster/mapster_params_editor.js');
 import 'ui/visualize/visualize_legend';
 
 function mapsterProvider(Private) {
-  var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-  var Schemas = Private(require('ui/Vis/Schemas'));
+  var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
+  var Schemas = Private(require('ui/vis/schemas'));
 
   return new TemplateVisType({
     name: 'mapster',
