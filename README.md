@@ -81,8 +81,3 @@ Then you can add any other aggregation if you need to filter your events using t
 | Explosion delay (in ms)       | The duration in ms of the gif.                                                             |
 | Number of events in the logs  | Number of lines in the event logs table.                                                   |
 |                               |                                                                                            |
-
-
-# Screenshots
-![Mapster](/docs/mapster.png?raw=true "Mapster map")
-![Mapster](/docs/globe.png?raw=true "Mapster globe")
