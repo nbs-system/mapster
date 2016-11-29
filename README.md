@@ -1,5 +1,5 @@
 # Mapster
-
+![Kibana Tag Cloud](sec_screenv1.gif)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/893661b4aa2f45378d96c21768b7ea8b)](https://www.codacy.com/app/xarkes/mapster)
 
 Mapster is a real-time event map implemented as a [Kibana](https://github.com/elastic/kibana) [visualization](https://www.elastic.co/guide/en/kibana/current/visualize.html).
