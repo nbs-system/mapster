@@ -19,17 +19,18 @@ To draw the 2D map, Mapster uses [d3js](https://d3js.org/) and it uses [threejs]
 
 ## Instructions
 Simply clone the repository into your Kibana plugins folder:
-```mkdir kibana && cd kibana;
-  git clone https://github.com/xarkes/mapster
-  cd ../
-  zip -r mapster.zip kibana
-  $KIBANA_HOME/bin/kibana-plugin install file:///`pwd`/mapster.zip
+```
+ mkdir kibana && cd kibana
+ git clone https://github.com/elastickent/mapster
+ cd ../
+ zip -r mapster.zip kibana
+ $KIBANA_HOME/bin/kibana-plugin install file:///`pwd`/mapster.zip
 ```
 
 If you are using Kibana from git and starting it in `dev` mode, Kibana will automatically refresh its cache and the plugin
 will be successfully loaded.
 Otherwise you can force it by stopping kibana, deleting the cache and starting kibana again.
-```sh
+```
 rm -r optimize/bundles
 ./bin/kibana
 ```
