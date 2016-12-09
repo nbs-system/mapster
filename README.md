@@ -3,7 +3,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/893661b4aa2f45378d96c21768b7ea8b)](https://www.codacy.com/app/xarkes/mapster)
 
 Mapster is a real-time event map implemented as a [Kibana](https://github.com/elastic/kibana) [visualization](https://www.elastic.co/guide/en/kibana/current/visualize.html).
-
 # How does it work
 Mapster is not truely in real-time. It fetches the events from ElasticSearch using Kibana and replays the events in real
 time with a lag corresponding to the Kibana refresh time.
@@ -15,7 +14,7 @@ To draw the 2D map, Mapster uses [d3js](https://d3js.org/) and it uses [threejs]
 
 # Installation
 ## Requirements
-- Kibana 5.0.1
+- Kibana 5.1.1
 
 ## Instructions
 Simply clone the repository into your Kibana plugins folder:
