@@ -14,7 +14,7 @@ To draw the 2D map, Mapster uses [d3js](https://d3js.org/) and it uses [threejs]
 
 # Installation
 ## Requirements
-- Kibana 5.1.1
+- Kibana 5.2.2
 
 ## Instructions
 Simply clone the repository into your Kibana plugins folder:
