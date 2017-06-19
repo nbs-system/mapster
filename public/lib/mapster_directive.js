@@ -42,48 +42,32 @@ module.directive("mapster", function (es, $timeout) {
       $scope.open = !$scope.open;
     };
 
-    //TODO Refactor this please it's so ugly
     if (config.globe === true) {
       renderer = require("plugins/mapster/lib/globe.js");
-      renderer.setConfig(config, $timeout);
-
-      /* Render events each time kibana fetches new data */
-      $scope.$watch("data", function () {
-        renderer.renderEvents($scope.data, $scope.colors);
-      });
-
-      /* Redraw everything when options are modified */
-      $scope.$watch("vis.params", function () {
-        config = loadConfig();
-        renderer.setConfig(config, $timeout);
-      });
-
-      // First map render is a bit postponed otherwise it does not work
-      $timeout(function () {
-        renderer.init($element);
-        renderer.render();
-      }, 100);
-    } else {
+	} else {
       renderer = require("plugins/mapster/lib/map.js");
-      renderer.setConfig(config, $timeout);
+	}
 
-      /* Render events each time kibana fetches new data */
-      $scope.$watch("data", function () {
-        renderer.renderEvents($scope.data, $scope.colors);
-      });
+	renderer.setConfig(config, $timeout);
 
-      /* Redraw everything when options are modified */
-      $scope.$watch("vis.params", function () {
-        config = loadConfig();
-        renderer.setConfig(config, $timeout);
-      });
+	/* Render events each time kibana fetches new data */
+	$scope.$watch("data", function () {
+	renderer.renderEvents($scope.data, $scope.colors);
+	});
 
-      // First map render is a bit postponed otherwise it does not work
-      $timeout(function () {
-        renderer.renderMap($element);
-      }, 100);
-    }
+	/* Redraw everything when options are modified */
+	$scope.$watch("vis.params", function () {
+	config = loadConfig();
+	renderer.setConfig(config, $timeout);
+	});
 
+	// First map render is a bit postponed otherwise it does not work
+	$timeout(function () {
+		if (config.globe === true) {
+			renderer.init($element);
+		}
+	renderer.render();
+	}, 100)
   }
 
   return {
