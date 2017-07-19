@@ -80,8 +80,8 @@ var Globe = function () {
     $timeout = t;
   }
 
-  function init(c) {
-    container = c[0];
+  function init(container) {
+    /* TODO Merge with render ? */
     var w = container.offsetWidth || window.innerWidth;
     var h = container.offsetHeight || window.innerHeight;
 
@@ -99,7 +99,7 @@ var Globe = function () {
     /* Sphere controls */
     container.addEventListener('mousedown', onMouseDown, false);
 
-    // Support for chrome and firefox
+    /* Support for chrome and firefox */
     container.addEventListener('mousewheel', onMouseWheel, false);
     container.addEventListener('DOMMouseScroll', onMouseWheel, false);
 
@@ -145,8 +145,7 @@ var Globe = function () {
     scene.add(atmosphere);
   }
 
-  // get the point in space on surface of sphere radius radius from lat lng
-  // lat and lng are in degrees
+  // Get the point in space on surface of sphere radius radius from lat lng (in degrees)
   function latlngPosFromLatLng(lat, lng, radius) {
     var phi = (90 - lat) * Math.PI / 180;
     var theta = (360 - lng) * Math.PI / 180;
@@ -485,7 +484,7 @@ var Globe = function () {
   function onMouseWheel(event) {
     event.preventDefault();
     if (overRenderer) {
-      // Support for chrome and firefox
+      /* Support for chrome and firefox */
       var delta = event.wheelDeltaY ? event.wheelDeltaY * 0.3 : -event.detail * 10;
       zoom(delta);
     }
@@ -520,10 +519,10 @@ var Globe = function () {
     renderer.render(scene, camera);
   }
 
-  this.setConfig = setConfig;
   this.init = init;
-  this.render = render;
+  this.setConfig = setConfig;
   this.renderEvents = renderEvents;
+  this.render = render;
 
   return this;
 };

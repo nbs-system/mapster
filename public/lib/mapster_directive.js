@@ -44,6 +44,7 @@ module.directive("mapster", function (es, $timeout) {
 
     if (config.globe === true) {
       renderer = require("plugins/mapster/lib/globe.js");
+      $element = $element[0];
     } else {
       renderer = require("plugins/mapster/lib/map.js");
     }
@@ -61,11 +62,10 @@ module.directive("mapster", function (es, $timeout) {
       renderer.setConfig(config, $timeout);
     });
 
-    // First map render is a bit postponed otherwise it does not work
+    /* First map render is a bit postponed otherwise it does not work */
     $timeout(function () {
-      if (config.globe === true) {
-        renderer.init($element);
-      }
+      /* TODO Merge both functions ? */
+      renderer.init($element);
       renderer.render();
     }, 100)
   }

@@ -11,6 +11,7 @@ var Map = function () {
   var SpecialBox = null;
   var config;
   var $timeout;
+  var map;
 
   function setConfig(c, t) {
     config = c;
@@ -375,20 +376,20 @@ var Map = function () {
     }
   }
 
-  /* Render the map */
-  function render(element) {
-    if (element === null || typeof element == "undefined") {
-      console.error("Could not draw the map, the element is missing !");
+  function init(container) {
+    /* TODO Merge with render ? */
+    if (container === null || typeof container == "undefined") {
+      console.error("Could not draw the map, the container is missing !");
       return;
     }
 
-    element.css({
-      height: element.parent().height(),
+    container.css({
+      height: container.parent().height(),
       width: "100%"
     });
 
-    var height = element.height();
-    var width = element.width();
+    var height = container.height();
+    var width = container.width();
 
     var scale = (height / 300) * 100;
 
@@ -403,25 +404,28 @@ var Map = function () {
       .attr("width", "100%")
       .attr("height", "99%");
 
-    // Declare svg elem to make objects appear above the map
-    var map = svg.append("svg")
-      .attr("width", element.parent().width())
-      .attr("height", element.parent().height());
+    /* Declare svg elem to make objects appear above the map */
+    map = svg.append("svg")
+      .attr("width", container.parent().width())
+      .attr("height", container.parent().height());
 
-    // Draw a sample object to get its size
+    /* Draw a sample object to get its size */
     var object = svg.append("path")
       .attr("d", config.ObjectShape);
     ObjectBox = object.node().getBBox();
     object.remove();
 
-    // Draw a sample special object to get its size
+    /* Draw a sample special object to get its size */
     var special = svg.append("path")
       .attr("d", config.SpecialShape);
     SpecialBox = special.node().getBBox();
     special.remove();
+  }
 
-    // Draw d3 map
-    // The first "/" in the url below is required to really access http://url/plugins/... and not app/plugins
+  /* Render the map */
+  function render() {
+    /* Draw d3 map */
+    /* The first "/" in the url below is required to really access http://url/plugins/... and not app/plugins */
     d3.json("/plugins/mapster/lib/map.topo.json", function (error, world) {
       var countries = require("plugins/mapster/lib/topojson.min.js").feature(world, world.objects.collection).features;
       map.selectAll(".country")
@@ -432,16 +436,16 @@ var Map = function () {
         .attr("d", path);
     });
 
-    // Get log table
+    /* Get log table */
     logs = d3.select("#logs");
   }
 
+  this.init = init;
   this.setConfig = setConfig;
   this.renderEvents = renderEvents;
   this.render = render;
 
   return this;
-
 };
 
 module.exports = new Map();
