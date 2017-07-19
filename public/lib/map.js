@@ -348,7 +348,7 @@ var Map = function () {
       }
 
       /* Make events with same timestamp appear smoothly/distributively on 1 second */
-      // TODO Improve this (it pauses before switching to another second 
+      // TODO Improve this (it pauses before switching to another second
       var diff = date - RefDate;
       diff = diff + 1000 / count * index;
 
@@ -376,7 +376,7 @@ var Map = function () {
   }
 
   /* Render the map */
-  function renderMap(element) {
+  function render(element) {
     if (element === null || typeof element == "undefined") {
       console.error("Could not draw the map, the element is missing !");
       return;
@@ -438,7 +438,7 @@ var Map = function () {
 
   this.setConfig = setConfig;
   this.renderEvents = renderEvents;
-  this.renderMap = renderMap;
+  this.render = render;
 
   return this;
 

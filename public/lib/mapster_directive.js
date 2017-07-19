@@ -44,30 +44,30 @@ module.directive("mapster", function (es, $timeout) {
 
     if (config.globe === true) {
       renderer = require("plugins/mapster/lib/globe.js");
-	} else {
+    } else {
       renderer = require("plugins/mapster/lib/map.js");
-	}
+    }
 
-	renderer.setConfig(config, $timeout);
+    renderer.setConfig(config, $timeout);
 
-	/* Render events each time kibana fetches new data */
-	$scope.$watch("data", function () {
-	renderer.renderEvents($scope.data, $scope.colors);
-	});
+    /* Render events each time kibana fetches new data */
+    $scope.$watch("data", function () {
+      renderer.renderEvents($scope.data, $scope.colors);
+    });
 
-	/* Redraw everything when options are modified */
-	$scope.$watch("vis.params", function () {
-	config = loadConfig();
-	renderer.setConfig(config, $timeout);
-	});
+    /* Redraw everything when options are modified */
+    $scope.$watch("vis.params", function () {
+      config = loadConfig();
+      renderer.setConfig(config, $timeout);
+    });
 
-	// First map render is a bit postponed otherwise it does not work
-	$timeout(function () {
-		if (config.globe === true) {
-			renderer.init($element);
-		}
-	renderer.render();
-	}, 100)
+    // First map render is a bit postponed otherwise it does not work
+    $timeout(function () {
+      if (config.globe === true) {
+        renderer.init($element);
+      }
+      renderer.render();
+    }, 100)
   }
 
   return {
