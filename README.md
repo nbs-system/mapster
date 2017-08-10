@@ -1,9 +1,8 @@
 # Mapster
-
+![Kibana Tag Cloud](sec_screenv1.gif)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/893661b4aa2f45378d96c21768b7ea8b)](https://www.codacy.com/app/xarkes/mapster)
 
 Mapster is a real-time event map implemented as a [Kibana](https://github.com/elastic/kibana) [visualization](https://www.elastic.co/guide/en/kibana/current/visualize.html).
-
 # How does it work
 Mapster is not truely in real-time. It fetches the events from ElasticSearch using Kibana and replays the events in real
 time with a lag corresponding to the Kibana refresh time.
@@ -15,18 +14,22 @@ To draw the 2D map, Mapster uses [d3js](https://d3js.org/) and it uses [threejs]
 
 # Installation
 ## Requirements
-- Kibana 4.5.0 (the only supported version for now)
+- Kibana 5.2.2
 
 ## Instructions
 Simply clone the repository into your Kibana plugins folder:
-```sh
-cd installedPlugins && git clone https://github.com/xarkes/mapster
+```
+ mkdir kibana && cd kibana
+ git clone https://github.com/elastickent/mapster
+ cd ../
+ zip -r mapster.zip kibana
+ $KIBANA_HOME/bin/kibana-plugin install file:///`pwd`/mapster.zip
 ```
 
 If you are using Kibana from git and starting it in `dev` mode, Kibana will automatically refresh its cache and the plugin
 will be successfully loaded.
 Otherwise you can force it by stopping kibana, deleting the cache and starting kibana again.
-```sh
+```
 rm -r optimize/bundles
 ./bin/kibana
 ```
@@ -77,8 +80,3 @@ Then you can add any other aggregation if you need to filter your events using t
 | Explosion delay (in ms)       | The duration in ms of the gif.                                                             |
 | Number of events in the logs  | Number of lines in the event logs table.                                                   |
 |                               |                                                                                            |
-
-
-# Screenshots
-![Mapster](/docs/mapster.png?raw=true "Mapster map")
-![Mapster](/docs/globe.png?raw=true "Mapster globe")

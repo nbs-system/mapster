@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var geohash = require('plugins/mapster/lib/latlon-geohash.js');
 
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import { AggResponseTabifyTabifyProvider } from 'ui/agg_response/tabify/tabify';
 
 var module = require('ui/modules').get('mapster');
 
@@ -115,4 +115,3 @@ module.controller('MapsterController', function ($scope, Private) {
 
   });
 });
-

@@ -3,17 +3,24 @@ require('plugins/mapster/lib/mapster_controller.js');
 require('plugins/mapster/lib/mapster_directive.js');
 require('plugins/mapster/mapster_params_editor.js');
 import 'ui/visualize/visualize_legend';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisSchemasProvider } from 'ui/vis/schemas';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import MapsterTemplate from 'plugins/mapster/mapster.html';
+import MapsterParamsEditor from 'plugins/mapster/mapster_params_editor.html'
 
 function mapsterProvider(Private) {
-  var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-  var Schemas = Private(require('ui/Vis/Schemas'));
+  // var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
+  // var Schemas = Private(require('ui/vis/schemas'));
+  const TemplateVisType = Private(TemplateVisTypeProvider);
+  const Schemas = Private(VisSchemasProvider);
 
   return new TemplateVisType({
     name: 'mapster',
     title: 'Mapster',
     description: 'MAPSTER MUCH PIEW MUCH WOW',
     icon: 'fa-globe',
-    template: require('plugins/mapster/mapster.html'),
+    template: MapsterTemplate,
     params: {
       defaults: {
         /* GENERAL */
@@ -40,7 +47,7 @@ function mapsterProvider(Private) {
         ExplosionDelay: 2700,
         maximumEvents: 10
       },
-      editor: require('plugins/mapster/mapster_params_editor.html')
+      editor: MapsterParamsEditor
     },
     schemas: new Schemas([
         {
@@ -105,5 +112,5 @@ function mapsterProvider(Private) {
   });
 }
 
-require('ui/registry/vis_types').register(mapsterProvider);
-
+VisTypesRegistryProvider.register(mapsterProvider);
+// require('ui/registry/vis_types').register(mapsterProvider);
